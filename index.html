@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>50A Ledger</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">PERSONAL HOME LEDGER</p>
+      <h1>50A Ledger</h1>
+      <p class="subtitle">Track what the place costs, what you returned, and what you avoided buying.</p>
+    </div>
+    <button id="seedBtn" class="ghost">Load sample 50A data</button>
+  </header>
+
+  <main class="shell">
+    <section class="hero-grid">
+      <article class="metric primary">
+        <span>Move-in net spend</span>
+        <strong id="netSpend">$0.00</strong>
+        <small id="budgetCopy">of $400.00 target</small>
+        <div class="progress"><div id="budgetBar"></div></div>
+      </article>
+      <article class="metric"><span>Gross purchases</span><strong id="grossSpend">$0.00</strong><small>before returns / refunds</small></article>
+      <article class="metric"><span>Refunds recovered</span><strong id="refunds">$0.00</strong><small>money returned to you</small></article>
+      <article class="metric"><span>Purchase Police saved</span><strong id="avoided">$0.00</strong><small>denied / avoided purchases</small></article>
+    </section>
+
+    <nav class="tabs" aria-label="Sections">
+      <button class="tab active" data-tab="ledger">Ledger</button>
+      <button class="tab" data-tab="condition">Move-in / Move-out</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </nav>
+
+    <section id="ledger" class="tab-panel active">
+      <div class="toolbar">
+        <div>
+          <h2>Transactions</h2>
+          <p>Receipts stay intact. Returns and refunds are added as adjustments.</p>
+        </div>
+        <button id="addTransactionBtn" class="accent">+ Add transaction</button>
+      </div>
+      <div id="transactions" class="cards empty-state">No transactions yet.</div>
+    </section>
+
+    <section id="condition" class="tab-panel">
+      <div class="toolbar">
+        <div>
+          <h2>Property condition</h2>
+          <p>Keep move-in and move-out proof together, room by room.</p>
+        </div>
+        <button id="addConditionBtn" class="accent">+ Add photos</button>
+      </div>
+      <div class="condition-grid">
+        <div>
+          <h3>Move-in</h3>
+          <div id="moveInGallery" class="gallery empty-state">No move-in photos yet.</div>
+        </div>
+        <div>
+          <h3>Move-out</h3>
+          <div id="moveOutGallery" class="gallery empty-state">No move-out photos yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="settings" class="tab-panel">
+      <div class="settings-card">
+        <label>Move-in budget target
+          <div class="money-input"><span>$</span><input id="budgetInput" type="number" step="0.01" min="0" value="400" /></div>
+        </label>
+        <button id="saveSettingsBtn" class="accent">Save</button>
+        <button id="exportBtn" class="ghost">Export JSON backup</button>
+        <label class="import-label">Import JSON backup<input id="importInput" type="file" accept="application/json" /></label>
+        <button id="clearBtn" class="danger">Clear all local data</button>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="transactionDialog">
+    <form method="dialog" id="transactionForm" class="dialog-form">
+      <div class="dialog-head"><div><p class="eyebrow">NEW PURCHASE</p><h2>Add transaction</h2></div><button value="cancel" class="icon-btn" aria-label="Close">×</button></div>
+      <div class="form-grid">
+        <label>Merchant<input name="merchant" required placeholder="Amazon, Walmart…" /></label>
+        <label>Date<input name="date" type="date" required /></label>
+        <label class="full">Receipt / order screenshot<input name="receipt" type="file" accept="image/*" /></label>
+      </div>
+      <div class="line-items-head"><h3>Line items</h3><button type="button" id="addLineBtn" class="ghost compact">+ line item</button></div>
+      <div id="lineItems"></div>
+      <label>Notes<textarea name="notes" rows="3" placeholder="Why this purchase made sense, return details, warranty notes…"></textarea></label>
+      <div class="dialog-actions"><button value="cancel" class="ghost">Cancel</button><button type="submit" value="default" class="accent">Save transaction</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="conditionDialog">
+    <form method="dialog" id="conditionForm" class="dialog-form">
+      <div class="dialog-head"><div><p class="eyebrow">PROPERTY CONDITION</p><h2>Add photo evidence</h2></div><button value="cancel" class="icon-btn" aria-label="Close">×</button></div>
+      <div class="form-grid">
+        <label>Snapshot<select name="phase"><option value="move-in">Move-in</option><option value="move-out">Move-out</option></select></label>
+        <label>Room<input name="room" required placeholder="Kitchen, bathroom…" /></label>
+        <label class="full">Photos<input name="photos" type="file" accept="image/*" multiple required /></label>
+        <label class="full">Notes<textarea name="notes" rows="3" placeholder="Existing scratch, clean appliance, floor condition…"></textarea></label>
+      </div>
+      <div class="dialog-actions"><button value="cancel" class="ghost">Cancel</button><button type="submit" value="default" class="accent">Save photos</button></div>
+    </form>
+  </dialog>
+
+  <template id="lineItemTemplate">
+    <div class="line-item">
+      <input data-field="name" required placeholder="Item name" />
+      <input data-field="amount" required type="number" min="0" step="0.01" placeholder="Price" />
+      <select data-field="category">
+        <option>Kitchen</option><option>Bathroom</option><option>Furniture</option><option>Utilities</option><option>Internet</option><option>Cleaning</option><option>Groceries</option><option>Security</option><option>Other</option>
+      </select>
+      <select data-field="status">
+        <option value="kept">Kept</option><option value="returned">Returned</option><option value="refunded">Refunded</option><option value="cancelled">Cancelled</option><option value="avoided">Avoided / denied</option>
+      </select>
+      <input data-field="adjustment" type="number" min="0" step="0.01" placeholder="Refund $" />
+      <button type="button" class="remove-line icon-btn" aria-label="Remove">×</button>
+    </div>
+  </template>
+  <script src="app.js"></script>
+</body>
+</html>
