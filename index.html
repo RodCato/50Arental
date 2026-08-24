@@ -13,7 +13,7 @@
       <h1>50A Ledger</h1>
       <p class="subtitle">Track what the place costs, what you returned, and what you avoided buying.</p>
     </div>
-    <button id="seedBtn" class="ghost">Load sample 50A data</button>
+    <button id="seedBtn" class="ghost">Load demo data</button>
   </header>
 
   <main class="shell">
@@ -27,6 +27,49 @@
       <article class="metric"><span>Gross purchases</span><strong id="grossSpend">$0.00</strong><small>before returns / refunds</small></article>
       <article class="metric"><span>Refunds recovered</span><strong id="refunds">$0.00</strong><small>money returned to you</small></article>
       <article class="metric"><span>Purchase Police saved</span><strong id="avoided">$0.00</strong><small>denied / avoided purchases</small></article>
+    </section>
+
+    <section class="move-in-cash-card" aria-labelledby="moveInCashTitle">
+      <div class="benchmark-head">
+        <div>
+          <p class="eyebrow">MOVE-IN CASH</p>
+          <h2 id="moveInCashTitle">Cash paid vs. housing cost</h2>
+          <p class="benchmark-summary">Refundable deposits are held cash, not housing expense.</p>
+        </div>
+      </div>
+      <div class="benchmark-grid move-in-grid">
+        <article class="benchmark-metric featured"><span>Move-in cash outflow</span><strong id="moveInCashOutflow">$0.00</strong><small>actual cash paid, including deposits</small></article>
+        <article class="benchmark-metric"><span>Move-in housing cost</span><strong id="moveInHousingCost">$0.00</strong><small>non-refundable / consumed charges</small></article>
+        <article class="benchmark-metric grocery-metric"><span>Refundable deposit held</span><strong id="depositHeld">$0.00</strong><small>expected back at move-out; excluded from housing benchmark</small></article>
+      </div>
+    </section>
+
+    <section class="benchmark-card" aria-labelledby="benchmarkTitle">
+      <div class="benchmark-head">
+        <div>
+          <p class="eyebrow">MONTHLY HOUSING BENCHMARK</p>
+          <h2 id="benchmarkTitle">50A vs. Josh</h2>
+          <p id="benchmarkSummary" class="benchmark-summary">Load transactions to compare this month.</p>
+        </div>
+        <div class="benchmark-callout">
+          <span>Under / over benchmark</span>
+          <strong id="benchmarkDifference">$0.00</strong>
+          <small id="benchmarkDifferenceLabel">based on this month's housing spend</small>
+        </div>
+      </div>
+      <div class="benchmark-grid">
+        <article class="benchmark-metric featured"><span>50A housing cost this month</span><strong id="housingTotal">$0.00</strong><small>recurring + one-time + utilities</small></article>
+        <article class="benchmark-metric"><span>Josh effective benchmark</span><strong id="joshBenchmark">$0.00</strong><small id="joshFormula">Rent + mandatory adjustments amortized over stay</small></article>
+        <article class="benchmark-metric"><span>Recurring 50A run-rate</span><strong id="recurringHousing">$0.00</strong><small>repeatable housing costs</small></article>
+        <article class="benchmark-metric"><span>One-time 50A purchases</span><strong id="oneTimeHousing">$0.00</strong><small>not amortized</small></article>
+        <article class="benchmark-metric"><span>Utilities</span><strong id="utilities">$0.00</strong><small>included in housing cost</small></article>
+        <article class="benchmark-metric grocery-metric"><span>Groceries</span><strong id="groceries">$0.00</strong><small>tracked separately; excluded from benchmark</small></article>
+      </div>
+      <div class="savings-grid">
+        <div><span>Monthly savings vs Josh</span><strong id="monthlySavings">$0.00</strong></div>
+        <div><span>Cumulative savings since move-in</span><strong id="cumulativeSavings">$0.00</strong></div>
+        <div><span>Projected annual savings</span><strong id="annualSavings">$0.00</strong><small>monthly difference × 12</small></div>
+      </div>
     </section>
 
     <nav class="tabs" aria-label="Sections">
@@ -71,8 +114,44 @@
         <label>Move-in budget target
           <div class="money-input"><span>$</span><input id="budgetInput" type="number" step="0.01" min="0" value="400" /></div>
         </label>
+        <div class="settings-section">
+          <p class="eyebrow">HOUSING BENCHMARK INPUTS</p>
+          <p class="settings-help">Update these values to recalculate Josh's effective monthly benchmark immediately.</p>
+          <label>50A monthly rent
+            <div class="money-input"><span>$</span><input id="rent50aInput" type="number" step="0.01" min="0" /></div>
+          </label>
+          <label>Josh monthly rent
+            <div class="money-input"><span>$</span><input id="joshRentInput" type="number" step="0.01" min="0" /></div>
+          </label>
+          <label>Josh cleaning fee
+            <div class="money-input"><span>$</span><input id="joshCleaningInput" type="number" step="0.01" min="0" /></div>
+          </label>
+          <label>Josh final week / Sunday move-out charge
+            <div class="money-input"><span>$</span><input id="joshMoveOutInput" type="number" step="0.01" min="0" /></div>
+          </label>
+          <label>Josh stay length (days)<input id="joshDaysInput" type="number" step="1" min="1" /></label>
+        </div>
+        <div class="settings-section">
+          <p class="eyebrow">50A LEASE &amp; MOVE-IN</p>
+          <p class="settings-help">These values manage one canonical lease move-in transaction in the ledger.</p>
+          <label>Move-in date<input id="moveInDateInput" type="date" /></label>
+          <label>First prorated rent
+            <div class="money-input"><span>$</span><input id="proratedRentInput" type="number" step="0.01" min="0" /></div>
+          </label>
+          <label>Non-refundable administrative fee
+            <div class="money-input"><span>$</span><input id="adminFeeInput" type="number" step="0.01" min="0" /></div>
+          </label>
+          <label>Refundable security deposit
+            <div class="money-input"><span>$</span><input id="depositAmountInput" type="number" step="0.01" min="0" /></div>
+          </label>
+          <label>Security deposit status<select id="depositStatusInput"><option value="held">Held</option><option value="refunded">Refunded</option><option value="partially_refunded">Partially refunded</option><option value="forfeited">Forfeited</option></select></label>
+          <label id="depositRefundedSettingLabel">Security deposit amount refunded
+            <div class="money-input"><span>$</span><input id="depositRefundedInput" type="number" step="0.01" min="0" /></div>
+          </label>
+        </div>
         <button id="saveSettingsBtn" class="accent">Save</button>
         <button id="exportBtn" class="ghost">Export JSON backup</button>
+        <p class="settings-help">JSON backup currently excludes receipt screenshots.</p>
         <label class="import-label">Import JSON backup<input id="importInput" type="file" accept="application/json" /></label>
         <button id="clearBtn" class="danger">Clear all local data</button>
       </div>
@@ -81,29 +160,38 @@
 
   <dialog id="transactionDialog">
     <form method="dialog" id="transactionForm" class="dialog-form">
-      <div class="dialog-head"><div><p class="eyebrow">NEW PURCHASE</p><h2>Add transaction</h2></div><button value="cancel" class="icon-btn" aria-label="Close">×</button></div>
+      <div class="dialog-head"><div><p class="eyebrow">NEW PURCHASE</p><h2>Add transaction</h2></div><button type="button" class="icon-btn" data-dialog-dismiss="transactionDialog" aria-label="Close">×</button></div>
       <div class="form-grid">
         <label>Merchant<input name="merchant" required placeholder="Amazon, Walmart…" /></label>
         <label>Date<input name="date" type="date" required /></label>
-        <label class="full">Receipt / order screenshot<input name="receipt" type="file" accept="image/*" /></label>
+        <label class="full attachment-picker">Expense screenshots
+          <input id="screenshotInput" name="screenshots" type="file" accept="image/jpeg,image/png,image/webp" multiple />
+          <small>JPG, JPEG, PNG, or WEBP. Optional; attach receipts, bills, or refund evidence.</small>
+        </label>
       </div>
+      <div id="attachmentPreview" class="attachment-preview" aria-live="polite"></div>
       <div class="line-items-head"><h3>Line items</h3><button type="button" id="addLineBtn" class="ghost compact">+ line item</button></div>
       <div id="lineItems"></div>
       <label>Notes<textarea name="notes" rows="3" placeholder="Why this purchase made sense, return details, warranty notes…"></textarea></label>
-      <div class="dialog-actions"><button value="cancel" class="ghost">Cancel</button><button type="submit" value="default" class="accent">Save transaction</button></div>
+      <div class="dialog-actions"><button type="button" class="ghost" data-dialog-dismiss="transactionDialog">Cancel</button><button type="submit" value="default" class="accent">Save transaction</button></div>
     </form>
+  </dialog>
+
+  <dialog id="imagePreviewDialog" class="image-preview-dialog" hidden>
+    <button id="closeImagePreviewBtn" class="icon-btn" aria-label="Close image preview">×</button>
+    <img id="imagePreview" alt="Expense screenshot preview" />
   </dialog>
 
   <dialog id="conditionDialog">
     <form method="dialog" id="conditionForm" class="dialog-form">
-      <div class="dialog-head"><div><p class="eyebrow">PROPERTY CONDITION</p><h2>Add photo evidence</h2></div><button value="cancel" class="icon-btn" aria-label="Close">×</button></div>
+      <div class="dialog-head"><div><p class="eyebrow">PROPERTY CONDITION</p><h2>Add photo evidence</h2></div><button type="button" class="icon-btn" data-dialog-dismiss="conditionDialog" aria-label="Close">×</button></div>
       <div class="form-grid">
         <label>Snapshot<select name="phase"><option value="move-in">Move-in</option><option value="move-out">Move-out</option></select></label>
         <label>Room<input name="room" required placeholder="Kitchen, bathroom…" /></label>
         <label class="full">Photos<input name="photos" type="file" accept="image/*" multiple required /></label>
         <label class="full">Notes<textarea name="notes" rows="3" placeholder="Existing scratch, clean appliance, floor condition…"></textarea></label>
       </div>
-      <div class="dialog-actions"><button value="cancel" class="ghost">Cancel</button><button type="submit" value="default" class="accent">Save photos</button></div>
+      <div class="dialog-actions"><button type="button" class="ghost" data-dialog-dismiss="conditionDialog">Cancel</button><button type="submit" value="default" class="accent">Save photos</button></div>
     </form>
   </dialog>
 
@@ -114,6 +202,13 @@
       <select data-field="category">
         <option>Kitchen</option><option>Bathroom</option><option>Furniture</option><option>Utilities</option><option>Internet</option><option>Cleaning</option><option>Groceries</option><option>Security</option><option>Other</option>
       </select>
+      <select data-field="bucket" aria-label="Financial bucket">
+        <option value="housing_recurring">Housing recurring</option><option value="utilities">Utilities</option><option value="housing_one_time">Housing one-time</option><option value="groceries">Groceries</option><option value="refundable_deposit">Refundable deposit</option><option value="excluded">Excluded</option>
+      </select>
+      <select data-field="period" aria-label="Rent period"><option value="monthly">Normal period</option><option value="prorated">Prorated / one period</option></select>
+      <select data-field="timing" aria-label="Charge timing"><option value="regular">Regular transaction</option><option value="move_in">Move-in charge</option></select>
+      <select data-field="depositStatus" aria-label="Deposit status"><option value="held">Held</option><option value="refunded">Refunded</option><option value="partially_refunded">Partially refunded</option><option value="forfeited">Forfeited</option></select>
+      <input data-field="depositRefunded" type="number" min="0" step="0.01" placeholder="Deposit returned $" />
       <select data-field="status">
         <option value="kept">Kept</option><option value="returned">Returned</option><option value="refunded">Refunded</option><option value="cancelled">Cancelled</option><option value="avoided">Avoided / denied</option>
       </select>
