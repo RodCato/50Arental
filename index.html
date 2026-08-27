@@ -57,6 +57,16 @@
         </div>
       </section>
       <p class="benchmark-note">Groceries and other non-housing expenses are excluded from the Josh housing comparison.</p>
+      <section class="payback-card" aria-labelledby="paybackName">
+        <div class="payback-head"><div><p class="eyebrow">SAVINGS CHALLENGE</p><h2 id="paybackName">Waterdrop Challenge</h2><p id="paybackStatus" class="benchmark-summary">GALLON 59 — BREAK EVEN</p></div><button id="addGallonBtn" type="button" class="accent">+1 GALLON</button></div>
+        <div class="progress payback-progress"><div id="paybackProgress"></div></div>
+        <div class="payback-progress-label"><span id="paybackProgressLabel">1 / 59 gallons</span><span id="paybackPercent">1.7% paid back</span></div>
+        <div class="payback-stats"><div><span>Gallons consumed</span><strong id="paybackGallons">1</strong></div><div><span>Dollars avoided</span><strong id="paybackAvoided">$1.25</strong></div><div><span>Investment remaining</span><strong id="paybackRemaining">$72.10</strong></div></div>
+        <p id="paybackPace" class="settings-help">5 dated completions unlock pace insights.</p><p id="paybackAnalytics" class="settings-help">Pace insights unlock at 5 dated gallons.</p>
+        <div id="paybackMilestones" class="payback-milestones" aria-label="Payback milestones"></div>
+        <details class="payback-history"><summary>Recent gallons</summary><div id="paybackHistory"></div></details>
+        <button id="undoGallonBtn" type="button" class="ghost compact payback-undo">Undo last gallon</button>
+      </section>
     </section>
 
     <nav class="tabs" aria-label="Sections">
