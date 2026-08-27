@@ -45,15 +45,15 @@
         <div class="benchmark-grid">
           <article class="benchmark-metric featured"><span>50A housing cost this month</span><strong id="housingTotal">$0.00</strong><small>recurring + one-time + utilities</small></article>
           <article class="benchmark-metric"><span>Josh effective benchmark</span><strong id="joshBenchmark">$0.00</strong><small id="joshFormula">Rent + mandatory adjustments amortized over stay</small></article>
-          <article class="benchmark-metric"><span>Recurring 50A run-rate</span><strong id="recurringHousing">$0.00</strong><small>repeatable housing costs</small></article>
+          <article class="benchmark-metric"><span>Known recurring run-rate</span><strong id="recurringHousing">$0.00</strong><small>utilities not yet recorded</small></article>
           <article class="benchmark-metric"><span>One-time 50A purchases</span><strong id="oneTimeHousing">$0.00</strong><small>not amortized</small></article>
           <article class="benchmark-metric"><span>Utilities</span><strong id="utilities">$0.00</strong><small>included in housing cost</small></article>
           <article class="benchmark-metric grocery-metric"><span>Groceries</span><strong id="groceries">$0.00</strong><small>tracked separately; excluded from benchmark</small></article>
         </div>
         <div class="savings-grid">
-          <div><span>Monthly savings vs Josh</span><strong id="monthlySavings">$0.00</strong></div>
+          <div><span>Projected recurring monthly savings vs Josh</span><strong id="monthlySavings">$0.00</strong></div>
           <div><span>Cumulative savings since move-in</span><strong id="cumulativeSavings">$0.00</strong></div>
-          <div><span>Projected annual savings</span><strong id="annualSavings">$0.00</strong><small>monthly difference × 12</small></div>
+          <div><span>Projected annual savings</span><strong id="annualSavings">$0.00</strong><small>known run-rate × 12; utilities not yet recorded</small></div>
         </div>
       </section>
       <p class="benchmark-note">Groceries and other non-housing expenses are excluded from the Josh housing comparison.</p>
@@ -105,7 +105,9 @@
         <article class="benchmark-metric"><span>Move-in housing cost</span><strong id="moveInHousingCost">$0.00</strong><small>non-refundable / consumed charges</small></article>
         <article class="benchmark-metric grocery-metric"><span>Refundable deposit held</span><strong id="depositHeld">$0.00</strong><small>expected back at move-out; excluded from housing benchmark</small></article>
       </div>
-        <div class="setup-spend-card"><span>50A setup spend</span><strong id="netSpend">$0.00</strong><small id="budgetCopy">of $400 setup target</small><div class="progress"><div id="budgetBar"></div></div></div>
+        <div class="setup-spend-card"><span>Move-In Essentials</span><strong id="netSpend">$0.00</strong><small id="budgetCopy">of $400 Move-In Essentials Target</small><div class="progress"><div id="budgetBar"></div></div></div>
+        <div class="setup-split-grid"><article><span>Forgotten Essentials Reserve</span><strong id="forgottenEssentialsSpend">$0.00</strong><small>of $100 reserve</small></article><article><span>Post-Move Improvements</span><strong id="improvementsSpend">$0.00</strong><small>one-time; outside the $400 target</small></article><article><span>Lease / Service Setup Charges</span><strong id="leaseServiceSetupSpend">$0.00</strong><small>required charges; outside household targets</small></article></div>
+        <p class="setup-total-note">Total one-time non-deposit spending: <strong id="oneTimeSetupTotal">$0.00</strong></p>
       </section>
       <div class="toolbar">
         <div><h2>Setup purchases</h2><p>Household/setup purchases that established 50A.</p></div>
@@ -241,6 +243,7 @@
       <select data-field="bucket" aria-label="Financial bucket">
         <option value="housing_recurring">Housing recurring</option><option value="utilities">Utilities</option><option value="housing_one_time">Housing one-time</option><option value="groceries">Groceries</option><option value="refundable_deposit">Refundable deposit</option><option value="excluded">Excluded</option>
       </select>
+      <select data-field="setupClass" aria-label="One-time setup classification"><option value="none">Not setup</option><option value="move_in_essential">Move-In Essential</option><option value="forgotten_essential">Forgotten Essential</option><option value="post_move_improvement">Post-Move Improvement</option><option value="lease_service_setup">Lease / Service Setup</option></select>
       <select data-field="period" aria-label="Rent period"><option value="monthly">Normal period</option><option value="prorated">Prorated / one period</option></select>
       <select data-field="timing" aria-label="Charge timing"><option value="regular">Regular transaction</option><option value="move_in">Move-in charge</option></select>
       <select data-field="depositStatus" aria-label="Deposit status"><option value="held">Held</option><option value="refunded">Refunded</option><option value="partially_refunded">Partially refunded</option><option value="forfeited">Forfeited</option></select>
