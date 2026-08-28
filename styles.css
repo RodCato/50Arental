@@ -20,3 +20,4 @@
 @media(max-width:860px){.category-summary{grid-template-columns:1fr 1fr}.category-summary>div:first-child{grid-column:1/-1}}
 @media(max-width:540px){.category-summary{grid-template-columns:1fr}.category-summary>div:first-child{grid-column:auto}.category-summary-net strong{font-size:1.8rem}}
 @media(max-width:540px){.setup-split-grid{grid-template-columns:1fr}}
+@media(max-width:540px){button,.tab,input,select,textarea{min-height:44px}.topbar,.shell{padding:16px}.dialog-form{padding:16px}.dialog-actions{flex-direction:column-reverse}.dialog-actions button{width:100%}.transaction-actions{width:100%;justify-content:space-between}.transaction-top{flex-direction:column}.payback-progress-label{flex-wrap:wrap}.settings-card{max-width:none}.line-item{min-width:0}.line-item>*{min-width:0}}

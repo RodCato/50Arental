@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>50A Ledger</title>
+  <meta name="theme-color" content="#0e1116" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -198,9 +202,9 @@
           <label>Break-even gallon<input id="waterdropBreakEvenInput" type="number" step="1" min="1" /></label>
         </div>
         <button id="saveSettingsBtn" class="accent">Save</button>
-        <button id="exportBtn" class="ghost">Export JSON backup</button>
-        <p class="settings-help">JSON backup currently excludes receipt screenshots.</p>
-        <label class="import-label">Import JSON backup<input id="importInput" type="file" accept="application/json" /></label>
+        <button id="exportBtn" class="ghost">Export 50A Backup</button>
+        <p class="settings-help">Portable backup includes ledger data and stored images.</p>
+        <label class="import-label">Import 50A Backup<input id="importInput" type="file" accept="application/json" /></label>
         <button id="clearBtn" class="danger">Clear all local data</button>
       </div>
     </section>
@@ -213,7 +217,7 @@
         <label>Merchant<input name="merchant" required placeholder="Amazon, Walmart…" /></label>
         <label>Date<input name="date" type="date" required /></label>
         <label class="full attachment-picker">Expense screenshots
-          <input id="screenshotInput" name="screenshots" type="file" accept="image/jpeg,image/png,image/webp" multiple />
+          <input id="screenshotInput" name="screenshots" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" multiple />
           <small>JPG, JPEG, PNG, or WEBP. Optional; attach receipts, bills, or refund evidence.</small>
         </label>
       </div>
@@ -236,7 +240,7 @@
       <div class="form-grid">
         <label>Snapshot<select name="phase"><option value="move-in">Move-in</option><option value="move-out">Move-out</option></select></label>
         <label>Room<input name="room" required placeholder="Kitchen, bathroom…" /></label>
-        <label class="full">Photos<input name="photos" type="file" accept="image/*" multiple required /></label>
+        <label class="full">Photos<input name="photos" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" multiple required /></label>
         <label class="full">Notes<textarea name="notes" rows="3" placeholder="Existing scratch, clean appliance, floor condition…"></textarea></label>
       </div>
       <div class="dialog-actions"><button type="button" class="ghost" data-dialog-dismiss="conditionDialog">Cancel</button><button type="submit" value="default" class="accent">Save photos</button></div>
@@ -265,6 +269,7 @@
       <button type="button" class="remove-line icon-btn" aria-label="Remove">×</button>
     </div>
   </template>
+  <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
   <script src="app.js"></script>
 </body>
 </html>
