@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const source=fs.readFileSync(require('node:path').join(__dirname,'..','date-utils.js'),'utf8');
+const context={};
+vm.runInNewContext(`${source};globalThis.localDateKey=localDateKey;globalThis.localMonthKey=localMonthKey;`,context);
+assert.equal(context.localMonthKey(new Date('2026-09-01T01:22:00Z')),'2026-08');
+assert.equal(context.localMonthKey(new Date('2026-09-01T04:59:59Z')),'2026-08');
+assert.equal(context.localMonthKey(new Date('2026-09-01T05:00:00Z')),'2026-09');
+assert.equal(context.localDateKey(new Date('2026-08-15T15:00:00Z')),'2026-08-15');
+console.log('Local calendar boundary helpers passed');
