@@ -9,7 +9,6 @@ A local-first prototype for tracking the true cost of 50A.
 - Refund adjustments without deleting original purchase history
 - Receipt/order screenshot attachment
 - Move-in and move-out photo evidence, room-by-room
-- Purchase Police avoided-spend total
 - JSON export/import backup
 - Reconciled 50A dataset seed with estimated-amount markers
 - Reused/owned-at-$0 and avoided/returned decision records
