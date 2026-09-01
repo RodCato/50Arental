@@ -200,6 +200,17 @@
           </label>
           <label>Break-even gallon<input id="waterdropBreakEvenInput" type="number" step="1" min="1" /></label>
         </div>
+        <div class="settings-section" id="googleSyncSection">
+          <p class="eyebrow">GOOGLE SYNC</p>
+          <p id="syncStatus" class="settings-help">Google not connected · local data remains available offline.</p>
+          <label>Google OAuth web client ID
+            <input id="googleClientIdInput" type="text" inputmode="text" autocomplete="off" placeholder="1234567890-....apps.googleusercontent.com" />
+          </label>
+          <p class="settings-help">Uses Google Drive private app data. Scope: Drive appDataFolder plus basic account identity. Tokens stay in this browser session, not localStorage.</p>
+          <div class="sync-actions"><button id="connectGoogleBtn" type="button" class="accent">Connect Google</button><button id="syncNowBtn" type="button" class="ghost">Sync now</button><button id="restoreGoogleBtn" type="button" class="ghost">Restore from Google</button><button id="disconnectGoogleBtn" type="button" class="ghost">Disconnect</button></div>
+          <p id="syncLastSuccess" class="settings-help">No successful sync yet.</p>
+          <p class="settings-help">Data is stored on this device. Use Backup to protect or move your ledger. Google sync is private to your account; it does not replace manual backups.</p>
+        </div>
         <button id="saveSettingsBtn" class="accent">Save</button>
         <button id="exportBtn" class="ghost">Export 50A Backup</button>
         <p class="settings-help">Portable backup includes ledger data and stored images.</p>
