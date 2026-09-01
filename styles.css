@@ -20,6 +20,7 @@
 @media(max-width:860px){.category-summary{grid-template-columns:1fr 1fr}.category-summary>div:first-child{grid-column:1/-1}}
 @media(max-width:540px){.category-summary{grid-template-columns:1fr}.category-summary>div:first-child{grid-column:auto}.category-summary-net strong{font-size:1.8rem}}
 @media(max-width:540px){.setup-split-grid{grid-template-columns:1fr}}
+@media(max-width:540px){.sync-actions{display:grid;grid-template-columns:1fr}.sync-actions button{width:100%}}
 /* Overview now uses three meaningful summary metrics. */
 .hero-grid{grid-template-columns:2fr repeat(2,1fr)}
 @media(max-width:540px){.hero-grid{grid-template-columns:1fr}}
