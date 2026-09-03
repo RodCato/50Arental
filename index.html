@@ -65,6 +65,7 @@
         <div class="progress payback-progress"><div id="paybackProgress"></div></div>
         <div class="payback-progress-label"><span id="paybackProgressLabel">1 / 59 gallons</span><span id="paybackPercent">1.7% paid back</span></div>
         <div class="payback-stats"><div><span>Gallons consumed</span><strong id="paybackGallons">1</strong></div><div><span>Dollars avoided</span><strong id="paybackAvoided">$1.25</strong></div><div><span>Investment remaining</span><strong id="paybackRemaining">$72.10</strong></div></div>
+        <p class="payback-last"><span>Last gallon completed</span><strong id="paybackLastCompleted">Date unknown</strong></p>
         <p id="paybackPace" class="settings-help">5 dated completions unlock pace insights.</p><p id="paybackAnalytics" class="settings-help">Pace insights unlock at 5 dated gallons.</p>
         <div id="paybackMilestones" class="payback-milestones" aria-label="Payback milestones"></div>
         <details class="payback-history"><summary>Recent gallons</summary><div id="paybackHistory"></div></details>
@@ -280,6 +281,7 @@
     </div>
   </template>
   <script src="date-utils.js"></script>
+  <script src="waterdrop-utils.js"></script>
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
   <script src="app.js"></script>
 </body>

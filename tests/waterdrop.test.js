@@ -1,0 +1,16 @@
+const assert=require('node:assert/strict');
+const WaterdropUtils=require('../waterdrop-utils.js');
+const event=(g,completedAt)=>({id:`g${g}`,gallon:g,completedAt,legacy:!completedAt});
+const five=[event(1,'2026-09-01T10:00:00Z'),event(2,'2026-09-02T22:00:00Z'),event(3,'2026-09-04T10:00:00Z'),event(4,'2026-09-05T22:00:00Z'),event(5,'2026-09-07T10:00:00Z')];
+assert.equal(WaterdropUtils.newestCompletion([event(1,null),event(2,'2026-09-02T22:00:00Z')]).gallon,2);
+assert.equal(WaterdropUtils.newestCompletion([event(1,'2026-09-01T10:00:00Z'),event(2,null)]).completedAt,null);
+assert.equal(WaterdropUtils.orderedRecent([event(1,'2026-09-01T10:00:00Z'),event(2,null),event(3,'2026-09-03T10:00:00Z')])[0].gallon,3);
+assert.equal(WaterdropUtils.pace(five).intervalDays,1.5);
+assert.equal(WaterdropUtils.pace(five).gallons30Days,20);
+assert.equal(WaterdropUtils.pace(five).label,'Avg. 1 gallon every 1.5 days');
+assert.equal(WaterdropUtils.datedEvents(five.slice(0,4)).length,4);
+assert.equal(WaterdropUtils.pace([event(1,'2026-09-01T10:00:00Z'),event(2,null),event(3,'2026-09-03T10:00:00Z'),event(4,'2026-09-04T10:00:00Z'),event(5,'2026-09-05T10:00:00Z')]).intervalDays,1.3333333333333333);
+assert.equal(WaterdropUtils.pace([event(1,'2026-09-01T10:00:00Z'),event(2,'2026-09-01T10:00:01Z'),event(3,'2026-09-01T10:00:02Z'),event(4,'2026-09-01T10:00:03Z'),event(5,'2026-09-01T10:00:04Z')]),null);
+assert.equal(WaterdropUtils.projectedBreakEvenDate(five,5,59).toISOString(),'2026-11-27T10:00:00.000Z');
+assert.equal(WaterdropUtils.projectedBreakEvenDate(five,59,59),null);
+console.log('Waterdrop completion and pace tests passed');
