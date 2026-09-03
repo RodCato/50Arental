@@ -12,7 +12,7 @@ A local-first prototype for tracking the true cost of 50A.
 - JSON export/import backup
 - Reconciled 50A dataset seed with estimated-amount markers
 - Reused/owned-at-$0 and avoided/returned decision records
-- Waterdrop payback metadata (starting at 1 gallon; break-even at gallon 59)
+- Waterdrop payback challenge with dated completion history, consumption pace, and break-even projection
 
 ## Run locally
 
@@ -48,7 +48,7 @@ Google sync does not replace **Export 50A Backup**. Manual export/import remains
 - Confirm the terminal serving the app is in `/Users/crod/Desktop/50Arental` and that the browser URL uses the expected port.
 - Check for another local server on port 8000 before starting one; stop only the server for this app.
 - If UI changes appear stale, hard-refresh, open browser site settings, unregister the service worker, and clear this site’s cache/storage only after exporting a backup.
-- The cache name is visible near the top of `sw.js` (`50a-ledger-shell-v4`). Increment it when shell assets change, then reload once to install the new worker.
+- The cache name is visible near the top of `sw.js` (`50a-ledger-shell-v5`). Increment it when shell assets change, then reload once to install the new worker.
 - On Android, use the browser’s **Add to Home screen** or **Install app** action after the site is served over HTTPS in production. Localhost is suitable for development; production installability should be checked on the deployed Vercel URL.
 
 ## Known limitations
