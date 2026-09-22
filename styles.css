@@ -27,3 +27,5 @@
 @media(max-width:540px){button,.tab,input,select,textarea{min-height:44px}.topbar,.shell{padding:16px}.dialog-form{padding:16px}.dialog-actions{flex-direction:column-reverse}.dialog-actions button{width:100%}.transaction-actions{width:100%;justify-content:space-between}.transaction-top{flex-direction:column}.payback-progress-label{flex-wrap:wrap}.settings-card{max-width:none}.line-item{min-width:0}.line-item>*{min-width:0}}
 
 .bills-list{margin-top:16px}.bill-active{display:flex!important;align-items:center;gap:10px!important}.bill-active input{width:auto}#billError{color:var(--danger)}
+
+#variableBillFields:not([hidden]){display:grid;gap:12px}#transactionBillError{color:var(--danger)}

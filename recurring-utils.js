@@ -1,4 +1,4 @@
-/* Monthly obligations are independent of paid transactions. No payment is generated here. */
+/* Monthly obligations stay independent; payment saves may explicitly update an estimate. */
 (function(root){
   const VERSION=1;
   const active=records=>(records||[]).filter(record=>record.active!==false);
@@ -51,7 +51,33 @@
     const paid=items.filter(item=>item.bucket==='utilities'&&!['avoided','cancelled','reused'].includes(item.status));
     return paid.length?`Recorded this month: ${paid.map(item=>`${item.name} ${money(Number(item.amount||0)-Number(item.adjustment||0))}`).join(' + ')}`:'No utility transactions recorded this month.';
   }
-  const api={active,total,upsert,deactivate,migrate,status,actualStatus};
+  function paymentPortion(transaction){
+    const actual=(transaction.items||[]).reduce((sum,item)=>sum+(['avoided','cancelled','reused'].includes(item.status)?0:Math.round(Number(item.amount||0)*100)-Math.round(Number(item.adjustment||0)*100)),0);
+    const oneTime=Number(transaction.oneTimeAmount??0);
+    if(!Number.isFinite(actual)||actual<0||!Number.isFinite(oneTime)||oneTime<0||oneTime>actual/100)throw new Error('One-time portion must be between $0 and the actual payment.');
+    return {actualAmount:actual/100,oneTimeAmount:Math.round(oneTime*100)/100,recurringAmount:(actual-Math.round(oneTime*100))/100};
+  }
+  // Explicit save-time side effect. Historical records never continuously drive estimates.
+  function saveTransaction(saved,transaction,{updateMonthlyEstimate=false}={},now=new Date().toISOString()){
+    const prior=saved.transactions.find(record=>record.id===transaction.id);
+    let next={...prior,...transaction,id:transaction.id||crypto.randomUUID()},bills=saved.recurringCharges||[];
+    if(next.recurringChargeId){
+      const bill=bills.find(record=>record.id===next.recurringChargeId);
+      const portion=paymentPortion(next);
+      next.oneTimeAmount=portion.oneTimeAmount;
+      if(updateMonthlyEstimate){
+        if(!bill||bill.active===false)throw new Error('Choose an active monthly bill before updating its estimate.');
+        if(bill.kind!=='estimated')throw new Error('Fixed monthly bills must be edited in Monthly bills.');
+        if(!next.items?.length||next.items.some(item=>!['utilities','housing_recurring'].includes(item.bucket)||item.status&&item.status!=='kept'))throw new Error('Use a separate housing or utility payment with kept line items to update a monthly estimate.');
+        bills=upsert(bills,{...bill,amount:portion.recurringAmount},now);
+      }
+    }else{
+      if(updateMonthlyEstimate)throw new Error('Choose a monthly bill before updating its estimate.');
+      delete next.recurringChargeId;delete next.oneTimeAmount;
+    }
+    return {...saved,recurringCharges:bills,transactions:prior?saved.transactions.map(record=>record.id===next.id?next:record):[...saved.transactions,next]};
+  }
+  const api={active,total,upsert,deactivate,migrate,status,actualStatus,paymentPortion,saveTransaction};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   else root.RecurringUtils=api;
 })(globalThis);
