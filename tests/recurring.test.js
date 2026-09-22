@@ -133,3 +133,37 @@ console.log('Variable bill payment, fixed-bill guard, invalid portions, legacy r
 
 assert.equal(RecurringUtils.paymentPortion(payment('all-one-time',1.10,1.10)).recurringAmount,0);
 assert.equal(RecurringUtils.paymentPortion({...payment('split',93,30),items:[{amount:'93',status:'kept'},{amount:'30',status:'kept'}]}).recurringAmount,93);
+
+// Reported $75 case: an explicit update replaces the existing $93 estimate.
+run(`state={...state,transactions:[],recurringCharges:[]};
+for(const bill of [{id:'rent',name:'Rent',amount:965},{id:'internet',name:'Spectrum',amount:40},{id:'insurance',name:'Insurance',amount:21},{id:'electric-audit',name:'Electricity',amount:93,kind:'estimated'}])state.recurringCharges=RecurringUtils.upsert(state.recurringCharges,{category:'Housing',...bill});`);
+context.payment=payment('reported-payment',75,0);
+run('state=RecurringUtils.saveTransaction(state,payment,{updateMonthlyEstimate:true});');
+assert.equal(run("benchmarkTotalsForMonth('2026-09').utilities"),75);
+assert.equal(run("state.recurringCharges.find(b=>b.id==='electric-audit').amount"),75);
+assert.equal(run('RecurringUtils.total(state.recurringCharges)'),1101);
+assert.equal(run("benchmarkTotalsForMonth('2026-09').monthlySavings"),670.38);
+context.payment=payment('reported-payment',123,30);
+run('state=RecurringUtils.saveTransaction(state,payment,{updateMonthlyEstimate:true});');
+assert.equal(run("benchmarkTotalsForMonth('2026-09').utilities"),123);
+assert.equal(run("state.recurringCharges.find(b=>b.id==='electric-audit').amount"),93);
+assert.equal(run('state.transactions.length'),1);
+
+// The edit form must expose whether Save updates the estimate or only the payment.
+const controls=Object.fromEntries(['#transactionBill','#variableBillFields','#transactionOneTime','#updateMonthlyEstimate','#transactionSaveEffect','#transactionBillHelp','#transactionEstimatePreview'].map(id=>[id,{value:'',checked:false,textContent:''}]));
+const submitControl={textContent:''};
+context.$=id=>controls[id];context.txForm={querySelector:()=>submitControl};
+context.editingTransactionId='reported-payment';context.money=money;context.collectItems=()=>payment('preview',75).items;
+controls['#transactionBill'].value='electric-audit';controls['#transactionOneTime'].value='0';
+run(source.slice(source.indexOf('function refreshTransactionBill(){'),source.indexOf("\n$('#transactionBill').addEventListener")));
+run('refreshTransactionBill()');
+assert.equal(submitControl.textContent,'Save payment only');
+assert.match(controls['#transactionSaveEffect'].textContent,/keep the monthly estimate at \$93.00/);
+controls['#updateMonthlyEstimate'].checked=true;
+run('refreshTransactionBill()');
+assert.equal(submitControl.textContent,'Save payment + update estimate');
+assert.match(controls['#transactionSaveEffect'].textContent,/from \$93.00 to \$75.00/);
+controls['#transactionBill'].value='rent';
+run('refreshTransactionBill()');
+assert.equal(controls['#variableBillFields'].hidden,true);
+assert.equal(submitControl.textContent,'Save changes');

@@ -48,7 +48,7 @@ Google sync does not replace **Export 50A Backup**. Manual export/import remains
 - Confirm the terminal serving the app is in `/Users/crod/Desktop/50Arental` and that the browser URL uses the expected port.
 - Check for another local server on port 8000 before starting one; stop only the server for this app.
 - If UI changes appear stale, hard-refresh, open browser site settings, unregister the service worker, and clear this site’s cache/storage only after exporting a backup.
-- The cache name is visible near the top of `sw.js` (`50a-ledger-shell-v8`). Increment it when shell assets change, then reload once to install the new worker.
+- The cache name is visible near the top of `sw.js` (`50a-ledger-shell-v9`). Increment it when shell assets change, then reload once to install the new worker.
 - On Android, use the browser’s **Add to Home screen** or **Install app** action after the site is served over HTTPS in production. Localhost is suitable for development; production installability should be checked on the deployed Vercel URL.
 
 ## Known limitations
@@ -92,3 +92,5 @@ In Add transaction, select an existing active monthly bill. For variable/estimat
 Transactions optionally store `recurringChargeId` (stable bill ID) and `oneTimeAmount`. Existing records need no migration. `RecurringUtils.saveTransaction(state, transaction, {updateMonthlyEstimate})` returns a new state containing both the transaction upsert and any requested variable-estimate update. It validates before mutation, uses cent arithmetic, retains transaction IDs on edits, and never creates a duplicate bill. Fixed bills reject estimate-update requests; ordinary associated payments never change their configured amount.
 
 Opening any existing transaction defaults the update checkbox **off**, even if that payment originally updated an estimate. Checking it explicitly applies that payment's service amount as today's estimate when saved, regardless of payment date. Unchecking it saves only the transaction. Inactive or unavailable bills cannot update estimates. Deleting/removing a transaction has no estimate side effect: no historical recalculation or rollback is introduced (there is no dedicated transaction-delete control in the current app). Manual changes in Monthly bills also remain independent. These rules prevent routine historical corrections from replacing today's estimate.
+
+The transaction save button explicitly says **Save payment only** or **Save payment + update estimate** for variable bills. A status beside it names the bill and shows the retained amount or the old → new estimate, so an edit cannot look like it will update an estimate when the checkbox is off.
