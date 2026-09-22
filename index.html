@@ -205,6 +205,17 @@
           </label>
           <label>Break-even gallon<input id="waterdropBreakEvenInput" type="number" step="1" min="1" /></label>
         </div>
+        <div class="settings-section" id="cloudFoundation">
+          <h3>Supabase foundation</h3>
+          <p class="settings-help">Sign-in and connectivity only. Local storage remains authoritative; nothing uploads automatically.</p>
+          <p id="cloudStatus" class="settings-help" role="status">Cloud foundation requires a configured build. Local ledger remains available.</p>
+          <form id="cloudSignIn">
+            <label>Email<input id="cloudEmail" type="email" autocomplete="email" required /></label>
+            <button id="cloudSend" type="submit" class="ghost" disabled>Send sign-in link</button>
+          </form>
+          <div class="sync-actions"><button id="cloudCheck" type="button" class="ghost" hidden>Check cloud access</button><button id="cloudSignOut" type="button" class="ghost" hidden>Sign out</button></div>
+          <p id="cloudMessage" class="settings-help" role="status" aria-live="polite"></p>
+        </div>
         <div class="settings-section" id="googleSyncSection">
           <p class="eyebrow">GOOGLE SYNC</p>
           <p id="syncStatus" class="settings-help">Google not connected · local data remains available offline.</p>
@@ -317,5 +328,6 @@
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
   <script src="recurring-utils.js"></script>
   <script src="app.js"></script>
+  <script defer src="cloud-foundation.js"></script>
 </body>
 </html>

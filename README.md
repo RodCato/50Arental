@@ -16,14 +16,18 @@ A local-first prototype for tracking the true cost of 50A.
 
 ## Run locally
 
-Serve the repository root so the service worker can run:
+Use Node.js 22 or newer and Python 3:
 
 ```bash
-cd /Users/crod/Desktop/50Arental
-python3 -m http.server 8000
+npm ci
+# Optional: copy .env.example to .env and fill only public URL/key.
+# Node does not automatically load .env; use the explicit command when configured:
+node --env-file=.env scripts/build.mjs
+# Or: npm run build   (uses environment variables; no config = local-only app)
+python3 -m http.server 8000 --directory dist
 ```
 
-Open <http://localhost:8000>. The static site can also be deployed directly to Vercel without a build step.
+Open <http://localhost:8000>. Vercel runs `npm ci` and `npm run build`, publishing only `dist/` via `vercel.json`. This small build bundles the Supabase SDK locally and generates a public config JSON; vanilla JavaScript cannot consume Vercel's environment variables directly. Serving the repository root still runs the original local ledger, but its cloud script is intentionally an unbuilt placeholder.
 
 ## PWA and device-local storage
 
@@ -33,7 +37,7 @@ Ledger metadata, settings, Waterdrop history, and attachment references remain o
 
 Use **Export 50A Backup** regularly to protect or move the ledger. The backup includes structured data, Waterdrop history, attachment metadata, and the referenced receipt/property images. Import is an explicit replace-local-data workflow and requires confirmation.
 
-## Google sync (SYNC-001)
+## LEGACY / pending retirement — Google sync (SYNC-001)
 
 Google sync is an explicit, private, local-first backup and merge path. It stores one structured `50a-ledger-sync.json` file in the signed-in Google Drive `appDataFolder`; it does not create a public link, use a backend, or support multi-user sharing. The OAuth scopes are `https://www.googleapis.com/auth/drive.appdata openid email profile`: private app-data storage plus the minimum identity scopes needed to show the connected account.
 
@@ -94,3 +98,88 @@ Transactions optionally store `recurringChargeId` (stable bill ID) and `oneTimeA
 Opening any existing transaction defaults the update checkbox **off**, even if that payment originally updated an estimate. Checking it explicitly applies that payment's service amount as today's estimate when saved, regardless of payment date. Unchecking it saves only the transaction. Inactive or unavailable bills cannot update estimates. Deleting/removing a transaction has no estimate side effect: no historical recalculation or rollback is introduced (there is no dedicated transaction-delete control in the current app). Manual changes in Monthly bills also remain independent. These rules prevent routine historical corrections from replacing today's estimate.
 
 The transaction save button explicitly says **Save payment only** or **Save payment + update estimate** for variable bills. A status beside it names the bill and shows the retained amount or the old → new estimate, so an edit cannot look like it will update an estimate when the checkbox is off.
+
+## Supabase Phase 1: foundation only
+
+**Supabase is NOT YET the authoritative data store. Local storage remains authoritative until the migration phase is explicitly completed.** Nothing uploads on sign-in. All existing transaction/recurring/dashboard code (`app.js`, `recurring-utils.js`), IndexedDB images, local import/export and Google controls remain active and unchanged. Google Drive sync is **LEGACY / pending retirement**; do not treat it as the new multi-device architecture.
+
+Architecture: static PWA → separate Supabase Auth/client boundary → owner-protected Postgres tables and private evidence Storage. `cloud/client.mjs` owns client/session/Auth; `cloud/data.mjs` only reads connectivity metadata; `cloud/ui.mjs` connects the small Settings panel. No financial repository, sync, OCR, Alexa endpoint or migration importer exists yet.
+
+### Public configuration and Vercel
+
+The existing Marketplace integration supplies `SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (confirmed in its Vercel quickstart; connected to `50-arental` for Preview and Production). The build accepts URL aliases `SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL`, and key aliases `SUPABASE_PUBLISHABLE_KEY` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` / `SUPABASE_ANON_KEY` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`, in that priority order.
+
+Only these two values enter `dist/cloud-config.json`. Publishable keys and legacy JWTs with role `anon` are accepted; unknown/secret/service-role keys fail the build without logging their values. No configuration yields a working local-only build; a partial configuration fails to avoid a misleading deployment. The build copies an explicit static-file allowlist. It never copies `.env`, migrations, tests, package metadata, database URLs or any other environment variables.
+
+In Vercel, confirm this repo/root and Node 22+ are selected and the integration variables apply to the desired Preview/Production environments. The repo's framework setting is `null` (static), build is `npm run build`, output `dist`. Remove any dashboard override that contradicts these settings. Rebuild/redeploy after environment changes. No real key is committed; `.env*`, `.vercel`, `dist`, and CLI temp credentials are ignored. Do not paste a full Marketplace environment dump into source or a public issue.
+
+### Authentication setup
+
+Use the Supabase email provider's **default Magic Link template**. No email-template customization, custom SMTP or paid plan is required by this implementation. The browser calls `signInWithOtp({email, options: {emailRedirectTo}})` with the current app origin/path; despite the SDK method's name, its default email contains a Sign in link.
+
+In **Authentication → URL Configuration**, set Site URL to the production app origin and add the exact local/preview callback URLs to Redirect URLs (for the supplied development preview, `http://127.0.0.1:8767/`; for the documented local server, `http://localhost:8000/`). Add the actual Vercel preview URL when testing there. Supabase falls back to Site URL when a requested redirect is not allowed, so configure this before the live click test. Restrict allowlisted hosts to your own app. Keep email verification enabled. See [Supabase passwordless email Auth](https://supabase.com/docs/guides/auth/auth-email-passwordless).
+
+Settings → Supabase foundation → enter email → Send sign-in link → open the email's Sign in link → Settings. The SDK handles its normal implicit callback, consumes the URL-fragment session and clears those tokens from the URL. Implicit flow is intentional for this static SPA: an email link may open a new tab without a PKCE verifier stored in the original tab. Expired/invalid links show a retry message. Identity, sign out and Check cloud access are available once signed in. Do not share sign-in links or copy their tokens into issues.
+
+Sessions use the separate `50a-supabase-auth` sessionStorage key, survive reload in the receiving tab, and are not part of portable or Google backups. Closing the tab normally ends persistence. The requesting tab may remain signed out if the email opens another tab; inspect Settings in the tab opened by the link. Sign out has local scope, so other devices remain signed in. No sign-in callback uploads local data or images.
+
+### Migrations and safe policy tests
+
+`supabase/migrations/20260922000100_initial_50a_schema.sql` is the source of truth, wrapped in a transaction. No migration is applied automatically during Vercel builds. Use the official Supabase CLI with your own local login; never commit CLI tokens or database passwords:
+
+```bash
+supabase login
+supabase link --project-ref YOUR_PROJECT_REF
+supabase db push --linked --dry-run
+supabase db push --linked
+```
+
+Check the linked project and dry-run before applying. If a database already contains conflicting tables or the bucket, reconcile its migration history rather than resetting it. The migration creates empty tables and the private bucket; it does not insert personal/financial records. Local `supabase start` requires the CLI and Docker; `supabase/config.toml` provides a normal local project configuration. It uses Supabase’s default email templates.
+
+```bash
+npm test
+npm run check
+npm run test:rls
+```
+
+`test:rls` requires PostgreSQL binaries (`initdb`, `pg_ctl`, `psql`) on PATH. It creates its own disposable cluster/socket under `/tmp`, applies a mock of Supabase's Auth claims/Storage tables, runs the real migration and policy tests, then removes the cluster. It never accepts a production database URL. It tests all eight personal tables, owner A/B isolation, impersonated inserts, owner transfer, anonymous denial, cross-owner parent references, timestamps, cascades and Storage paths. These are real PostgreSQL/RLS tests, **not** an end-to-end test of hosted Auth email delivery or Storage HTTP download/upload behavior.
+
+### Schema mapping
+
+All personal rows use UUIDs (default `gen_random_uuid()`; explicit browser `crypto.randomUUID()` IDs will also work), `owner_id → auth.users`, and server-maintained `created_at`/`updated_at`. Client-supplied timestamp changes are overridden; created_at is preserved on update. Historical event dates remain separate. No local IDs have been converted yet.
+
+| Local model | Future cloud home / mapping |
+| --- | --- |
+| `transactions[]` | `transactions`: merchant, date → transaction_date, notes, recurringChargeId, oneTimeAmount, systemKey/sampleKey. Totals/status remain derived from items. |
+| Transaction `items[]` | `transaction_items`: name → description, position, amount/category, all six buckets/five setup classes, status, adjustment, deposit status/refunds, moveIn/prorated/estimated/recurring/giftCardOffset. No existing subcategory to preserve. |
+| `recurringCharges[]` | `recurring_charges`: name, amount, category, kind `fixed`/`estimated`, utilityType, active. Fixed/variable arithmetic still lives in existing code. |
+| `condition[]` | `property_condition`: room, phase `move-in`/`move-out`, date → condition_date, notes. |
+| Transaction attachmentIds / condition photo refs / legacy inline images | `attachments`: metadata only, exactly one appropriate parent, original filename, MIME, bytes, Storage path. Actual binary stays out of Postgres. Existing blobs/data URLs remain local. |
+| `settings.waterdropPayback.waterdropCompletions` | `water_events`: each completion is one gallon; gallon ordinal/count is derived, not a mutable counter. Unknown legacy dates may be null only with `legacy=true`; preserve known event time. |
+| Budget + user settings | `user_settings`: budget, forgotten essentials budget, Josh rent/stay days, lease move-in/deposit inputs, Waterdrop name/baseline/system cost/break-even. `rent50a` is a legacy recurring-bill fallback, not a second cloud source of rent. |
+| `settings.joshAdjustments[]` | `benchmark_adjustments`: ordered label/amount rows, preserving the existing benchmark methodology. |
+| Google connection/status, tokens, selected tabs/month/filter, UI state | Device-local only; no cloud settings dump. |
+
+Composite owner+parent foreign keys prevent cross-owner links even when UUIDs are known. Transaction deletion cascades items and attachment metadata; property deletion cascades evidence metadata. Referenced recurring charges are restricted from hard deletion (use active=false). Storage binary cleanup is a separate future operation: deleting metadata does **not** delete Storage objects. Account deletion likewise needs an explicit Storage cleanup workflow before any future account-management UI.
+
+The current cloud schema deliberately does not encode transaction totals, dashboard values, OCR fields or device-specific cache state. A later OCR migration can introduce staged jobs referencing uploaded attachments and finalize multiple reviewed line items; Phase 1 requires an attachment parent, so a draft transaction or separate staging model must be designed then.
+
+### RLS, Storage and diagnostics
+
+Each of the eight tables has explicit authenticated SELECT/INSERT/UPDATE/DELETE policies using `owner_id = auth.uid()`, with UPDATE checks preventing owner changes. Anonymous roles have no personal-table privileges. Child tables have their own RLS and owner-constrained parent keys. Supabase administrative/service roles can bypass RLS by design and must never enter the browser.
+
+The migration creates private bucket `50a-evidence`, limited to WebP/JPEG/PNG and 20 MiB per file. Paths are `{owner_uuid}/receipts/{attachment_uuid}.webp` or `{owner_uuid}/property/{attachment_uuid}.webp` (JPEG/PNG extensions also accepted). Four Storage object policies allow access only under the authenticated owner's first path component; writes also validate folder/filename shape. No public URLs, uploads, signed URL generator, or existing-image migration is added. Future reads should use authenticated downloads or short-lived signed URLs. Review any pre-existing Storage policies before applying: permissive policies on the same bucket combine with OR, so unrelated broad policies can undermine isolation.
+
+Check cloud access authenticates the session, reads table access without fetching financial content, calls a restricted metadata-only `ledger_foundation_health()` RPC, and lists one entry under the user's own receipt path. The RPC is SECURITY DEFINER with an empty search path, an explicit authenticated check and no anonymous execute permission. It only returns schema version/private-bucket/policy presence, never ledger rows. Policy presence is not proof of effective isolation; the SQL tests cover that separately. Health writes no sample records and uploads no images.
+
+The service-worker shell version is bumped to v10 to deliver the added bundle and sign-in markup. It caches only allowlisted same-origin shell assets; `cloud-config.json`, Auth and Storage requests are not intercepted/cached. The cloud config has `Cache-Control: no-store`; the worker script has `no-cache`. Offline/cloud failures leave the local ledger usable.
+
+### Proposed Phase 2 (not implemented)
+
+1. Back up **each device** with the existing portable export, including actual IndexedDB blobs; inventory counts, legacy inline images, date formats and per-device differences. Keep immutable recovery copies.
+2. Select a signed-in owner and explicitly choose/merge the authoritative source dataset. Resolve desktop/phone conflicts in a dry-run preview; never let last-writer silently overwrite the other device.
+3. Build a resumable, idempotent importer with a persisted old-ID → UUID map/import manifest, including transaction items, conditions, recurring links and water events. Reject invalid values for review. Preserve Josh inputs and reconcile actual/recurring/deposit/refund arithmetic exactly.
+4. Import parent rows and children with owner-constrained transactional operations. Upload actual image bytes to private owner paths; verify byte counts/checksums and authenticated download, then commit attachment metadata. Resume safely; track orphan cleanup. Keep historical event dates separate from cloud creation times.
+5. Compare every record count, monthly/category total, recurring run-rate, water completion count and receipt/property photo against the local snapshot. Produce an exception report and require explicit acceptance before switching stores.
+6. Introduce reusable cloud operations and deliberately design offline queues, concurrency/conflict detection and deletion semantics. Test two devices and two users, including retries, partial uploads, sign-out, offline editing and reconnect. Cut over only after that contract is tested.
+7. Keep local originals and portable recovery available through a rollback window. Retire legacy Google sync in a separate reviewed change after cloud backup/restore and phone/desktop parity are verified. No Sheets, OCR or Alexa in this migration phase.
