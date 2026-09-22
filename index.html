@@ -211,9 +211,7 @@
           <p id="cloudStatus" class="settings-help" role="status">Cloud foundation requires a configured build. Local ledger remains available.</p>
           <form id="cloudSignIn">
             <label>Email<input id="cloudEmail" type="email" autocomplete="email" required /></label>
-            <button id="cloudSend" type="button" class="ghost" disabled>Send sign-in code</button>
-            <label>Email code<input id="cloudCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" minlength="6" maxlength="10" required /></label>
-            <button id="cloudVerify" type="submit" class="accent" disabled>Verify code</button>
+            <button id="cloudSend" type="submit" class="ghost" disabled>Send sign-in link</button>
           </form>
           <div class="sync-actions"><button id="cloudCheck" type="button" class="ghost" hidden>Check cloud access</button><button id="cloudSignOut" type="button" class="ghost" hidden>Sign out</button></div>
           <p id="cloudMessage" class="settings-help" role="status" aria-live="polite"></p>

@@ -26,20 +26,18 @@ test('client is optional and Auth session is isolated from ledger backups', asyn
     assert.equal(options.cache, 'no-store'); return { ok: true, json: async () => ({ enabled: true, url, publishableKey: key }) };
   }, factory: (endpoint, apiKey, options) => {
     assert.equal(endpoint, url); assert.equal(apiKey, key); assert.equal(options.auth.storage, storage);
-    assert.equal(options.auth.storageKey, '50a-supabase-auth'); assert.equal(options.auth.detectSessionInUrl, false);
+    assert.equal(options.auth.storageKey, '50a-supabase-auth'); assert.equal(options.auth.detectSessionInUrl, true);
   } });
 });
-test('OTP send/verify and local sign-out use SDK Auth boundary', async () => {
+test('default Magic Link uses the app callback and local sign-out', async () => {
   const calls = [];
   const auth = cloudAuth({ auth: {
     signInWithOtp: async args => calls.push(['send', args]),
-    verifyOtp: async args => ({ data: { user: { email: args.email } }, error: null }),
     signOut: async args => calls.push(['out', args])
   } });
-  await auth.sendCode('synthetic@example.test');
-  assert.equal((await auth.verifyCode('synthetic@example.test', '123456')).data.user.email, 'synthetic@example.test');
+  await auth.sendLink('synthetic@example.test', 'https://ledger.example.test/');
   await auth.signOut();
-  assert.deepEqual(calls, [['send', { email: 'synthetic@example.test' }], ['out', { scope: 'local' }]]);
+  assert.deepEqual(calls, [['send', { email: 'synthetic@example.test', options: { emailRedirectTo: 'https://ledger.example.test/' } }], ['out', { scope: 'local' }]]);
 });
 test('health reads every table and own Storage path without mutation', async () => {
   const read = [];

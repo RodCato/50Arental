@@ -115,9 +115,13 @@ In Vercel, confirm this repo/root and Node 22+ are selected and the integration 
 
 ### Authentication setup
 
-Enable the Supabase email provider. In **Authentication → Email templates → Magic Link**, include a code in the subject/body, e.g. `<p>Your 50A sign-in code is: {{ .Token }}</p>` (also include `{{ .Token }}` in Confirm signup if the project uses a distinct signup confirmation template). The UI uses `signInWithOtp` and `verifyOtp` with type `email`. A default link-only template must be changed before this code-only UI can complete login. Configure 6–10 digit OTPs, appropriate expiry/rate limits, the production Site URL, and SMTP when needed; Supabase's default sender restricts delivery and is not a production mail service. Keep email verification enabled. See [Supabase passwordless email Auth](https://supabase.com/docs/guides/auth/auth-email-passwordless).
+Use the Supabase email provider's **default Magic Link template**. No email-template customization, custom SMTP or paid plan is required by this implementation. The browser calls `signInWithOtp({email, options: {emailRedirectTo}})` with the current app origin/path; despite the SDK method's name, its default email contains a Sign in link.
 
-Settings → Supabase foundation → send code → enter code → verify. Signed-in identity, sign out, and Check cloud access appear without changing the local ledger. Sessions use the separate `50a-supabase-auth` sessionStorage key, survive reload in the tab, and are not part of portable or Google backups. Closing the browser tab normally ends persistence. Sign out has local scope, so other devices remain signed in. The UI does not accept magic-link tokens from URLs.
+In **Authentication → URL Configuration**, set Site URL to the production app origin and add the exact local/preview callback URLs to Redirect URLs (for the supplied development preview, `http://127.0.0.1:8767/`; for the documented local server, `http://localhost:8000/`). Add the actual Vercel preview URL when testing there. Supabase falls back to Site URL when a requested redirect is not allowed, so configure this before the live click test. Restrict allowlisted hosts to your own app. Keep email verification enabled. See [Supabase passwordless email Auth](https://supabase.com/docs/guides/auth/auth-email-passwordless).
+
+Settings → Supabase foundation → enter email → Send sign-in link → open the email's Sign in link → Settings. The SDK handles its normal implicit callback, consumes the URL-fragment session and clears those tokens from the URL. Implicit flow is intentional for this static SPA: an email link may open a new tab without a PKCE verifier stored in the original tab. Expired/invalid links show a retry message. Identity, sign out and Check cloud access are available once signed in. Do not share sign-in links or copy their tokens into issues.
+
+Sessions use the separate `50a-supabase-auth` sessionStorage key, survive reload in the receiving tab, and are not part of portable or Google backups. Closing the tab normally ends persistence. The requesting tab may remain signed out if the email opens another tab; inspect Settings in the tab opened by the link. Sign out has local scope, so other devices remain signed in. No sign-in callback uploads local data or images.
 
 ### Migrations and safe policy tests
 
@@ -130,7 +134,7 @@ supabase db push --linked --dry-run
 supabase db push --linked
 ```
 
-Check the linked project and dry-run before applying. If a database already contains conflicting tables or the bucket, reconcile its migration history rather than resetting it. The migration creates empty tables and the private bucket; it does not insert personal/financial records. Local `supabase start` requires the CLI and Docker; `supabase/config.toml` provides a normal local project configuration. Its local Auth code template is versioned in `supabase/templates/sign-in-code.html`; hosted templates must be configured separately.
+Check the linked project and dry-run before applying. If a database already contains conflicting tables or the bucket, reconcile its migration history rather than resetting it. The migration creates empty tables and the private bucket; it does not insert personal/financial records. Local `supabase start` requires the CLI and Docker; `supabase/config.toml` provides a normal local project configuration. It uses Supabase’s default email templates.
 
 ```bash
 npm test

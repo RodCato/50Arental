@@ -33,9 +33,3 @@ enable_signup = true
 enable_confirmations = true
 otp_length = 6
 otp_expiry = 3600
-[auth.email.template.magic_link]
-subject = "Your 50A Ledger sign-in code"
-content_path = "./supabase/templates/sign-in-code.html"
-[auth.email.template.confirmation]
-subject = "Your 50A Ledger sign-in code"
-content_path = "./supabase/templates/sign-in-code.html"

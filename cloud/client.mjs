@@ -7,13 +7,12 @@ export async function initializeCloud({ fetcher = fetch, factory = createClient,
   // Auth stays separate from the ledger and from portable/Google backups.
   return factory(config.url, config.publishableKey, { auth: {
     storage, storageKey: '50a-supabase-auth', persistSession: true,
-    autoRefreshToken: true, detectSessionInUrl: false
+    autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit'
   } });
 }
 export function cloudAuth(client) {
   return {
-    sendCode: email => client.auth.signInWithOtp({ email }),
-    verifyCode: (email, token) => client.auth.verifyOtp({ email, token, type: 'email' }),
+    sendLink: (email, redirectTo) => client.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } }),
     signOut: () => client.auth.signOut({ scope: 'local' }),
     getUser: () => client.auth.getUser(),
     onChange: callback => client.auth.onAuthStateChange((_event, session) => callback(session?.user || null))
