@@ -35,7 +35,11 @@ Open <http://localhost:8000>. Vercel runs `npm ci` and `npm run build`, publishi
 
 Ledger metadata, settings, Waterdrop history, and attachment references remain on the current device in localStorage. Receipt screenshots and move-in/move-out photos are stored as compressed Blobs in IndexedDB. There is no automatic Mac ↔ Android synchronization unless Google sync is explicitly configured in Settings.
 
-Use **Export 50A Backup** regularly to protect or move the ledger. The backup includes structured data, Waterdrop history, attachment metadata, and the referenced receipt/property images. Import is an explicit replace-local-data workflow and requires confirmation.
+Use **Export 50A Backup** to create a verified portable v3 artifact. Export freezes state, requires all supported referenced images, and verifies SHA-256 integrity before download. Import validates before writes, requires confirmation, retains a verified recovery snapshot, stages evidence in a new generation, and verifies on reopen. Explicit legacy-v2 imports remain supported with a warning and validation. See [Portable Backup v3](BACKUP.md) for the schema, offline validator, recovery protocol, limitations, test commands, and authoritative phone procedure.
+
+```sh
+node scripts/validate-backup.mjs /path/to/50a-ledger-backup-v3.json
+```
 
 ## LEGACY / pending retirement — Google sync (SYNC-001)
 
@@ -45,7 +49,7 @@ Configure a Google OAuth web client ID in Settings and add the local or producti
 
 Ledger records, settings, stable IDs, timestamps, tombstones, and attachment references are synchronized as structured data. Receipt and property image blobs remain in local IndexedDB in this phase, so binary upload is intentionally deferred. The app remains usable offline: local writes continue, offline sync is queued, and **Sync now** performs an explicit merge when connectivity returns. Newer record timestamps win deterministically; equal-time divergent records preserve the local record and surface a conflict count. An empty device never overwrites a populated remote file: initial sync downloads/merges populated remote data, while an empty remote is initialized from local data.
 
-Google sync does not replace **Export 50A Backup**. Manual export/import remains the complete recovery path, including binary attachments.
+Google sync does not replace **Export 50A Backup**. Verified portable v3 export/import is the recovery path for supported binary attachments. Missing or nonportable evidence blocks certification.
 
 ## PWA development / cache troubleshooting
 
@@ -70,7 +74,7 @@ Actual spending still comes only from dated transaction line items. For a $123 e
 
 `recurring-utils.js` provides pure migration, upsert, deactivation, total, and status functions. Records have stable `id`, `name`, `amount`, `category`, `kind`, `utilityType`, `active`, `createdAt`, and `updatedAt` fields. The existing `fiftyA-ledger-v1` localStorage object gains `recurringCharges` and `recurringChargesVersion: 1`. The transaction schema and image storage are unchanged.
 
-On first load (or import of an older backup), the migration converts the saved rent setting and explicitly recurring service lines into bills. Repeated service names use the latest dated amount, not the sum of historical payments. The original $40 internet value comes from the reconciled seed's Spectrum monthly service line; no internet bill is invented if that line is absent. Existing transactions are retained, and an existing bills array—including an empty one—is authoritative. Deactivation persists and migration does not recreate inactive bills. Normal JSON backups include the collection; the already-existing Drive backup/merge path carries these records using their timestamps. No Sheets or voice integration is added.
+On first legacy local load, the migration converts the saved rent setting and explicitly recurring service lines into bills. Repeated service names use the latest dated amount, not the sum of historical payments. The original $40 internet value comes from the reconciled seed's Spectrum monthly service line; no internet bill is invented if that line is absent. Existing transactions are retained, and an existing bills array—including an empty one—is authoritative. Deactivation persists and migration does not recreate inactive bills. Normal JSON backups include the collection; the already-existing Drive backup/merge path carries these records using their timestamps. No Sheets or voice integration is added.
 
 The known run-rate is the sum of active monthly bills, rounded in cents. Projected monthly savings equal Josh's unchanged effective benchmark minus that run-rate; annual savings multiply that by 12. The existing cumulative projection multiplies current savings by the number of months with transactions; its label now explicitly calls it a projection across recorded months. It is not historical realized savings. Overview actuals use the current calendar month; the Monthly screen uses the selected month.
 

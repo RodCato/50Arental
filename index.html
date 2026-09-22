@@ -229,6 +229,8 @@
         </div>
         <button id="saveSettingsBtn" class="accent">Save</button>
         <button id="exportBtn" class="ghost">Export 50A Backup</button>
+        <button id="recoveryExportBtn" class="ghost">Export pre-import recovery snapshot</button>
+        <p id="backupStatus" role="status" aria-live="polite"></p>
         <p class="settings-help">Portable backup includes ledger data and stored images.</p>
         <label class="import-label">Import 50A Backup<input id="importInput" type="file" accept="application/json" /></label>
         <button id="clearBtn" class="danger">Clear all local data</button>
@@ -327,7 +329,10 @@
   <script src="waterdrop-utils.js"></script>
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
   <script src="recurring-utils.js"></script>
-  <script src="app.js"></script>
+  <script src="finance-utils.js"></script>
+  <script src="backup-utils.js"></script>
+  <script src="backup-storage.js"></script>
+  <script src="backup-boot.js"></script>
   <script defer src="cloud-foundation.js"></script>
 </body>
 </html>
