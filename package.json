@@ -2,13 +2,22 @@
   "name": "50a-ledger",
   "version": "0.1.0",
   "private": true,
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "TZ=America/Chicago node --test tests/*.test.js tests/*.test.mjs",
-    "check": "node --check app.js && node --check recurring-utils.js && node --check sw.js && node --check cloud/ui.mjs",
-    "test:rls": "bash scripts/test-rls.sh"
+    "test": "TZ=America/Chicago node --test tests/*.test.js tests/*.test.mjs tests/*.test.cjs",
+    "check": "node --check app.js && node --check recurring-utils.js && node --check sw.js && node --check cloud/ui.mjs && node --check finance-utils.js && node --check backup-utils.js && node --check backup-storage.js && node --check backup-boot.js && node --check scripts/validate-backup.mjs && node --check scripts/test-backup-browser.mjs",
+    "test:rls": "bash scripts/test-rls.sh",
+    "test:backup": "node --test tests/backup.test.cjs",
+    "validate:backup": "node scripts/validate-backup.mjs",
+    "test:backup:browser": "node scripts/test-backup-browser.mjs"
   },
-  "dependencies": { "@supabase/supabase-js": "2.117.0" },
-  "devDependencies": { "esbuild": "0.28.2" }
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
 }
