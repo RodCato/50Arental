@@ -63,3 +63,23 @@ assert.equal(run('state.recurringCharges[0].active'),false);
 const insurance=RecurringUtils.migrate({settings:{},transactions:[{date:'2026-09-01',items:[{name:"Renter's insurance",amount:12,bucket:'housing_recurring',recurring:true}]}]});
 assert.equal(RecurringUtils.total(insurance.recurringCharges),12);
 assert.equal(RecurringUtils.total(RecurringUtils.upsert([],{id:'free',name:'Free service',category:'Other',amount:0})),0);
+
+// Annual projections must reconcile with the cent-rounded monthly value displayed.
+context.localMonthKey=()=> '2026-09';
+run(declaration('benchmarkTotals'));
+run(`state=RecurringUtils.migrate(migrateRecurringSpectrumToUtility({...load(),recurringCharges:undefined,recurringChargesVersion:undefined}));
+state.recurringCharges=RecurringUtils.upsert(state.recurringCharges,{id:'internet-audit',name:'Spectrum monthly service',amount:40,category:'Internet'});
+state.recurringCharges=RecurringUtils.upsert(state.recurringCharges,{id:'electric-audit',name:'Electricity',amount:93,category:'Utilities'});
+state.recurringCharges=RecurringUtils.upsert(state.recurringCharges,{id:'insurance-audit',name:"Renter's insurance",amount:21,category:'Insurance'});`);
+const audit=run('benchmarkTotals()');
+const display=value=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(value);
+assert.equal(audit.recurringRunRate,1119);
+assert.equal(audit.benchmark,1450+718/(68/30.4375)); // Methodology remains full precision.
+assert.equal(display(audit.benchmark),'$1,771.38');
+assert.equal(audit.monthlySavings,652.38);
+assert.equal(display(audit.monthlySavings),'$652.38');
+assert.equal(display(audit.annual),'$7,828.56');
+assert.equal(audit.annual,Math.round(audit.monthlySavings*100)*12/100);
+assert.equal(audit.utilities,123);
+assert.equal(run("state.recurringCharges.find(bill=>bill.id==='electric-audit').amount"),93);
+console.log('Display audit: $1,771.38 - $1,119.00 = $652.38; $652.38 × 12 = $7,828.56');
