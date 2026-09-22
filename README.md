@@ -48,7 +48,7 @@ Google sync does not replace **Export 50A Backup**. Manual export/import remains
 - Confirm the terminal serving the app is in `/Users/crod/Desktop/50Arental` and that the browser URL uses the expected port.
 - Check for another local server on port 8000 before starting one; stop only the server for this app.
 - If UI changes appear stale, hard-refresh, open browser site settings, unregister the service worker, and clear this site’s cache/storage only after exporting a backup.
-- The cache name is visible near the top of `sw.js` (`50a-ledger-shell-v5`). Increment it when shell assets change, then reload once to install the new worker.
+- The cache name is visible near the top of `sw.js` (`50a-ledger-shell-v6`). Increment it when shell assets change, then reload once to install the new worker.
 - On Android, use the browser’s **Add to Home screen** or **Install app** action after the site is served over HTTPS in production. Localhost is suitable for development; production installability should be checked on the deployed Vercel URL.
 
 ## Known limitations
@@ -56,3 +56,30 @@ Google sync does not replace **Export 50A Backup**. Manual export/import remains
 - Data is device-local; backups are manual and there is no cloud sync or cross-device merge.
 - Browser storage quotas and persistent-storage permission vary by device. The app requests persistent storage when the browser exposes that API, but continues working if permission is denied.
 - Camera capture depends on browser/device support; the same controls continue to allow gallery and file selection.
+
+
+## Monthly bills / recurring charges (MVP-002)
+
+Use **Monthly bills** to add, edit, deactivate, or reactivate expected monthly housing obligations. Categories are free text; fixed/estimated amounts and an optional utility type control the explanation shown on the dashboard. Rent is now edited here. Bills do not create payments.
+
+Actual spending still comes only from dated transaction line items. For a $123 electric payment that includes a $30 connection fee, keep $123 under Utilities (either one total or separate $93 service and $30 fee lines), and enter a separate $93 estimated Electricity monthly bill. The connection fee remains in actual housing costs; it is not also counted as a Household purchase or included in projections.
+
+`recurring-utils.js` provides pure migration, upsert, deactivation, total, and status functions. Records have stable `id`, `name`, `amount`, `category`, `kind`, `utilityType`, `active`, `createdAt`, and `updatedAt` fields. The existing `fiftyA-ledger-v1` localStorage object gains `recurringCharges` and `recurringChargesVersion: 1`. The transaction schema and image storage are unchanged.
+
+On first load (or import of an older backup), the migration converts the saved rent setting and explicitly recurring service lines into bills. Repeated service names use the latest dated amount, not the sum of historical payments. The original $40 internet value comes from the reconciled seed's Spectrum monthly service line; no internet bill is invented if that line is absent. Existing transactions are retained, and an existing bills array—including an empty one—is authoritative. Deactivation persists and migration does not recreate inactive bills. Normal JSON backups include the collection; the already-existing Drive backup/merge path carries these records using their timestamps. No Sheets or voice integration is added.
+
+The known run-rate is the sum of active monthly bills, rounded in cents. Projected monthly savings equal Josh's unchanged effective benchmark minus that run-rate; annual savings multiply that by 12. The existing cumulative projection multiplies current savings by the number of months with transactions; its label now explicitly calls it a projection across recorded months. It is not historical realized savings. Overview actuals use the current calendar month; the Monthly screen uses the selected month.
+
+Migration cannot infer the recurring service portion of an unsplit utility payment: configure that bill explicitly. Estimates have no effective-date history yet, and utility completeness text uses the optional utility-type field. Before using existing Drive sync across devices, update all devices to this app version; older clients do not know the bills collection.
+
+### Validation
+
+```bash
+TZ=America/Chicago node --test tests/*.test.js
+node --check app.js
+node --check recurring-utils.js
+node --check sw.js
+git diff --check
+```
+
+This vanilla JavaScript static PWA has no package manifest, build step, lint script, or TypeScript check. The Node regression suite covers legacy loading, idempotent migration, bill edits/deactivation, dynamic text, and the $93 + $30 electricity example. The audit with active Rent $965, Internet $40, and Electricity $93 totals $1,098; actual utilities are $123 and the fee contributes $0 to projections. Josh's benchmark is $1,771.38 and projected savings are $673.38/month.
