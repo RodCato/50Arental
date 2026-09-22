@@ -48,7 +48,7 @@ Google sync does not replace **Export 50A Backup**. Manual export/import remains
 - Confirm the terminal serving the app is in `/Users/crod/Desktop/50Arental` and that the browser URL uses the expected port.
 - Check for another local server on port 8000 before starting one; stop only the server for this app.
 - If UI changes appear stale, hard-refresh, open browser site settings, unregister the service worker, and clear this site’s cache/storage only after exporting a backup.
-- The cache name is visible near the top of `sw.js` (`50a-ledger-shell-v6`). Increment it when shell assets change, then reload once to install the new worker.
+- The cache name is visible near the top of `sw.js` (`50a-ledger-shell-v8`). Increment it when shell assets change, then reload once to install the new worker.
 - On Android, use the browser’s **Add to Home screen** or **Install app** action after the site is served over HTTPS in production. Localhost is suitable for development; production installability should be checked on the deployed Vercel URL.
 
 ## Known limitations
@@ -62,7 +62,7 @@ Google sync does not replace **Export 50A Backup**. Manual export/import remains
 
 Use **Monthly bills** to add, edit, deactivate, or reactivate expected monthly housing obligations. Categories are free text; fixed/estimated amounts and an optional utility type control the explanation shown on the dashboard. Rent is now edited here. Bills do not create payments.
 
-Actual spending still comes only from dated transaction line items. For a $123 electric payment that includes a $30 connection fee, keep $123 under Utilities (either one total or separate $93 service and $30 fee lines), and enter a separate $93 estimated Electricity monthly bill. The connection fee remains in actual housing costs; it is not also counted as a Household purchase or included in projections.
+Actual spending still comes only from dated transaction line items. For a $123 electric payment that includes a $30 connection fee, keep $123 under Utilities (either one total or separate $93 service and $30 fee lines), and select the Electricity variable bill in the transaction form, enter $30 as its one-time portion, and select Update monthly estimate. Saving records the payment and updates the estimate to $93. The connection fee remains in actual housing costs; it is not also counted as a Household purchase or included in projections.
 
 `recurring-utils.js` provides pure migration, upsert, deactivation, total, and status functions. Records have stable `id`, `name`, `amount`, `category`, `kind`, `utilityType`, `active`, `createdAt`, and `updatedAt` fields. The existing `fiftyA-ledger-v1` localStorage object gains `recurringCharges` and `recurringChargesVersion: 1`. The transaction schema and image storage are unchanged.
 
@@ -70,7 +70,7 @@ On first load (or import of an older backup), the migration converts the saved r
 
 The known run-rate is the sum of active monthly bills, rounded in cents. Projected monthly savings equal Josh's unchanged effective benchmark minus that run-rate; annual savings multiply that by 12. The existing cumulative projection multiplies current savings by the number of months with transactions; its label now explicitly calls it a projection across recorded months. It is not historical realized savings. Overview actuals use the current calendar month; the Monthly screen uses the selected month.
 
-Migration cannot infer the recurring service portion of an unsplit utility payment: configure that bill explicitly. Estimates have no effective-date history yet, and utility completeness text uses the optional utility-type field. Before using existing Drive sync across devices, update all devices to this app version; older clients do not know the bills collection.
+Migration cannot infer the recurring service portion of an unsplit utility payment: associate the payment with a variable bill and enter its one-time portion explicitly. Estimates have no effective-date history yet, and utility completeness text uses the optional utility-type field. Before using existing Drive sync across devices, update all devices to this app version; older clients do not know the bills collection.
 
 ### Validation
 
@@ -83,3 +83,12 @@ git diff --check
 ```
 
 This vanilla JavaScript static PWA has no package manifest, build step, lint script, or TypeScript check. The Node regression suite covers legacy loading, idempotent migration, bill edits/deactivation, dynamic text, and the $93 + $30 electricity example. The audit with active Rent $965, Internet $40, and Electricity $93 totals $1,098; actual utilities are $123 and the fee contributes $0 to projections. Josh's benchmark is $1,771.38 and projected savings are $673.38/month.
+
+
+### Updating variable estimates from a payment
+
+In Add transaction, select an existing active monthly bill. For variable/estimated bills, **Update monthly estimate from this payment** defaults on for new payments. Enter the total paid in the line items and the **One-time / non-recurring portion** (default $0); the preview shows payment minus one-time portion before saving. Use one transaction per bill, with kept housing/utility line items. The payment uses the net line-item amount after refund adjustments. The one-time portion is metadata within the total, not another expense line: do not add it to the total a second time.
+
+Transactions optionally store `recurringChargeId` (stable bill ID) and `oneTimeAmount`. Existing records need no migration. `RecurringUtils.saveTransaction(state, transaction, {updateMonthlyEstimate})` returns a new state containing both the transaction upsert and any requested variable-estimate update. It validates before mutation, uses cent arithmetic, retains transaction IDs on edits, and never creates a duplicate bill. Fixed bills reject estimate-update requests; ordinary associated payments never change their configured amount.
+
+Opening any existing transaction defaults the update checkbox **off**, even if that payment originally updated an estimate. Checking it explicitly applies that payment's service amount as today's estimate when saved, regardless of payment date. Unchecking it saves only the transaction. Inactive or unavailable bills cannot update estimates. Deleting/removing a transaction has no estimate side effect: no historical recalculation or rollback is introduced (there is no dedicated transaction-delete control in the current app). Manual changes in Monthly bills also remain independent. These rules prevent routine historical corrections from replacing today's estimate.

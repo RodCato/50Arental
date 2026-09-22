@@ -152,7 +152,7 @@
 
     <section id="recurring" class="tab-panel">
       <div class="toolbar"><div><h2>Monthly bills</h2><p>Expected ongoing housing costs. These do not create transactions.</p></div><button id="addBillBtn" class="accent">Add monthly bill</button></div>
-      <article class="metric"><span>Active recurring run-rate</span><strong id="billsTotal">$0.00</strong><small>Enter service amounts only: a $123 electric payment with a $30 connection fee means a $93 monthly bill. Record the full payment in Transactions.</small></article>
+      <article class="metric"><span>Active recurring run-rate</span><strong id="billsTotal">$0.00</strong><small>For variable bills, select the monthly bill when recording a transaction to update its estimate. One-time fees stay in actual spending.</small></article>
       <div id="recurringList" class="cards bills-list"></div>
     </section>
     <section id="settings" class="tab-panel">
@@ -236,6 +236,16 @@
           <small>JPG, JPEG, PNG, or WEBP. Optional; attach receipts, bills, or refund evidence.</small>
         </label>
       </div>
+      <section class="settings-section" aria-label="Monthly bill association">
+        <label>Monthly bill (optional)<select id="transactionBill"><option value="">Not associated with a monthly bill</option></select></label>
+        <p id="transactionBillHelp" class="settings-help">Associate this payment with one monthly bill. Use a separate transaction for unrelated purchases.</p>
+        <div id="variableBillFields" hidden>
+          <label class="bill-active"><input id="updateMonthlyEstimate" type="checkbox" /> Update monthly estimate from this payment</label>
+          <label>One-time / non-recurring portion ($)<input id="transactionOneTime" type="number" min="0" step="0.01" value="0.00" /></label>
+          <p id="transactionEstimatePreview" class="settings-help" aria-live="polite"></p>
+        </div>
+        <p id="transactionBillError" role="alert"></p>
+      </section>
       <div id="attachmentPreview" class="attachment-preview" aria-live="polite"></div>
       <div class="line-items-head"><h3>Line items</h3><button type="button" id="addLineBtn" class="ghost compact">+ line item</button></div>
       <div id="lineItems"></div>

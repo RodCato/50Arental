@@ -83,3 +83,53 @@ assert.equal(audit.annual,Math.round(audit.monthlySavings*100)*12/100);
 assert.equal(audit.utilities,123);
 assert.equal(run("state.recurringCharges.find(bill=>bill.id==='electric-audit').amount"),93);
 console.log('Display audit: $1,771.38 - $1,119.00 = $652.38; $652.38 × 12 = $7,828.56');
+
+// Single-entry variable payments use stable bill IDs and an explicit save-time update.
+const payment=(id,amount,oneTimeAmount=0,recurringChargeId='electric-audit')=>({id,merchant:'Electric company',date:'2026-09-10',recurringChargeId,oneTimeAmount,items:[{name:'Electricity payment',amount:String(amount),bucket:'utilities',category:'Utilities',status:'kept'}]});
+run("state.recurringCharges=RecurringUtils.upsert(state.recurringCharges,{...state.recurringCharges.find(b=>b.id==='electric-audit'),kind:'estimated'});state.transactions=[];");
+context.payment=payment('payment-1',123,30);
+run('state=RecurringUtils.saveTransaction(state,payment,{updateMonthlyEstimate:true});');
+assert.equal(run('state.transactions.length'),1);
+assert.equal(run('state.recurringCharges.length'),4);
+assert.equal(run("benchmarkTotalsForMonth('2026-09').utilities"),123);
+assert.equal(run('RecurringUtils.total(state.recurringCharges)'),1119);
+assert.equal(run("state.recurringCharges.find(b=>b.id==='electric-audit').amount"),93);
+assert.equal(run('state.transactions[0].oneTimeAmount'),30);
+context.payment={...payment('payment-2',87.42),date:'2026-10-10'};
+run('state=RecurringUtils.saveTransaction(state,payment,{updateMonthlyEstimate:true});');
+assert.equal(run("state.recurringCharges.find(b=>b.id==='electric-audit').amount"),87.42);
+assert.equal(run("benchmarkTotalsForMonth('2026-10').utilities"),87.42);
+assert.equal(run('state.transactions.length'),2);
+// Historical corrections are opt-in, even if the original save updated the estimate.
+context.payment=payment('payment-1',125,30);
+run('state=RecurringUtils.saveTransaction(state,payment);');
+assert.equal(run("state.recurringCharges.find(b=>b.id==='electric-audit').amount"),87.42);
+assert.equal(run('state.transactions.length'),2);
+run('state.transactions=state.transactions.filter(t=>t.id!=="payment-1");');
+assert.equal(run("state.recurringCharges.find(b=>b.id==='electric-audit').amount"),87.42);
+context.payment=payment('payment-2',88,0);
+run('state=RecurringUtils.saveTransaction(state,payment,{updateMonthlyEstimate:true});');
+assert.equal(run("state.recurringCharges.find(b=>b.id==='electric-audit').amount"),88);
+assert.equal(run('state.transactions.length'),1);
+for(const invalid of [-1,124,Infinity,NaN]){
+  context.payment=payment('invalid',123,invalid);
+  const snapshot=run('JSON.stringify(state)');
+  assert.throws(()=>run('RecurringUtils.saveTransaction(state,payment,{updateMonthlyEstimate:true})'),/One-time portion/);
+  assert.equal(run('JSON.stringify(state)'),snapshot);
+}
+context.payment=payment('fixed',900,0,'recurring-legacy-rent');
+run('state=RecurringUtils.saveTransaction(state,payment);');
+assert.equal(run("state.recurringCharges.find(b=>b.id==='recurring-legacy-rent').amount"),965);
+assert.throws(()=>run('RecurringUtils.saveTransaction(state,payment,{updateMonthlyEstimate:true})'),/Fixed monthly bills/);
+context.payment=payment('inactive',90);
+run("state.recurringCharges=RecurringUtils.deactivate(state.recurringCharges,'electric-audit');");
+assert.throws(()=>run('RecurringUtils.saveTransaction(state,payment,{updateMonthlyEstimate:true})'),/active monthly bill/);
+const legacyPayment={id:'unlinked',date:'2026-09-01',items:[{name:'Old electric',amount:'123',bucket:'utilities'}]};
+context.payment=legacyPayment;
+run('state=RecurringUtils.saveTransaction(state,payment);');
+assert.equal(run('normalizeTransactions(state.transactions).find(t=>t.id==="unlinked").recurringChargeId'),undefined);
+assert.equal(run('normalizeTransactions(state.transactions).find(t=>t.id==="unlinked").items[0].amount'),'123');
+console.log('Variable bill payment, fixed-bill guard, invalid portions, legacy records, and historical edit/delete tests passed');
+
+assert.equal(RecurringUtils.paymentPortion(payment('all-one-time',1.10,1.10)).recurringAmount,0);
+assert.equal(RecurringUtils.paymentPortion({...payment('split',93,30),items:[{amount:'93',status:'kept'},{amount:'30',status:'kept'}]}).recurringAmount,93);
