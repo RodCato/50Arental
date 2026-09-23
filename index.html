@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <script>try{if(JSON.parse(localStorage.getItem('50a-data-mode')||'null')?.mode==='cloud')document.body.classList.add('cloud-locked')}catch{document.body.classList.add('cloud-locked')}</script>
   <header class="topbar">
     <div>
       <p class="eyebrow">PERSONAL HOME LEDGER</p>
@@ -206,9 +207,9 @@
           <label>Break-even gallon<input id="waterdropBreakEvenInput" type="number" step="1" min="1" /></label>
         </div>
         <div class="settings-section" id="cloudFoundation">
-          <h3>Supabase foundation</h3>
-          <p class="settings-help">Sign-in and connectivity only. Local storage remains authoritative; nothing uploads automatically.</p>
-          <p id="cloudStatus" class="settings-help" role="status">Cloud foundation requires a configured build. Local ledger remains available.</p>
+          <h3>Cloud ledger</h3>
+          <p class="settings-help">Cloud activation is explicit on each device. Your existing local ledger is preserved.</p>
+          <div id="cloudLedgerControls"></div><p id="cloudStatus" class="settings-help" role="status">Cloud foundation requires a configured build. Local ledger remains available.</p>
           <form id="cloudSignIn">
             <label>Email<input id="cloudEmail" type="email" autocomplete="email" required /></label>
             <button id="cloudSend" type="submit" class="ghost" disabled>Send sign-in link</button>

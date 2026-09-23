@@ -29,3 +29,10 @@
 .bills-list{margin-top:16px}.bill-active{display:flex!important;align-items:center;gap:10px!important}.bill-active input{width:auto}#billError{color:var(--danger)}
 
 #variableBillFields:not([hidden]){display:grid;gap:12px}#transactionBillError{color:var(--danger)}
+
+/* Cloud cache stays hidden until the bound owner is authenticated. */
+.cloud-locked main > :not(#settings),.cloud-locked .topbar button,.cloud-locked #settings .settings-card:not(:has(#cloudStatus)){display:none!important}
+.cloud-locked #settings{display:block!important}
+.cloud-locked dialog{display:none!important}
+
+.cloud-locked #settings .settings-card > :not(#cloudFoundation){display:none!important}
