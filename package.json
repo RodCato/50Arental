@@ -16,7 +16,8 @@
     "migrate:certified": "node scripts/migrate-certified-backup.mjs",
     "test:migration": "node --test tests/migration.test.mjs && node scripts/test-migration-db.mjs",
     "test:cloud": "node --test tests/cutover.test.mjs && node scripts/test-cloud-db.mjs",
-    "test:cloud:browser": "node scripts/test-cloud-browser.mjs"
+    "test:cloud:browser": "node scripts/test-cloud-browser.mjs",
+    "test:auth:browser": "node scripts/test-auth-browser.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.0"

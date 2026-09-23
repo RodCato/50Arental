@@ -1,3 +1,4 @@
+import vm from 'node:vm';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
@@ -26,6 +27,7 @@ test('client is optional and Auth session is isolated from ledger backups', asyn
     assert.equal(options.cache, 'no-store'); return { ok: true, json: async () => ({ enabled: true, url, publishableKey: key }) };
   }, factory: (endpoint, apiKey, options) => {
     assert.equal(endpoint, url); assert.equal(apiKey, key); assert.equal(options.auth.storage, storage);
+    assert.equal(options.auth.persistSession, true); assert.equal(options.auth.autoRefreshToken, true);
     assert.equal(options.auth.storageKey, '50a-supabase-auth'); assert.equal(options.auth.detectSessionInUrl, true);
   } });
 });
@@ -70,4 +72,12 @@ test('build excludes private environment values and serves complete PWA shell', 
   for (const [, asset] of sw.matchAll(/'\.\/([^']+)'/g)) assert(files.includes(asset), `Missing cached asset ${asset}`);
   execFileSync(process.execPath, ['scripts/build.mjs'], { env: { PATH: process.env.PATH, HOME: process.env.HOME }, stdio: 'pipe' });
   assert.deepEqual(JSON.parse(await readFile('dist/cloud-config.json')), { enabled: false });
+});
+
+test('service worker does not intercept Auth, config, or session-bearing API requests', async () => {
+  const handlers = {};
+  vm.runInNewContext(await readFile('sw.js', 'utf8'), { URL, self: { location: { origin: 'https://ledger.example.test', href: 'https://ledger.example.test/sw.js' }, addEventListener: (name, callback) => { handlers[name] = callback; } } });
+  for (const url of ['https://example.supabase.co/auth/v1/token', 'https://example.supabase.co/auth/v1/user', 'https://ledger.example.test/cloud-config.json', 'https://ledger.example.test/auth/v1/token']) {
+    for (const method of ['GET', 'POST']) handlers.fetch({ request: { url, method }, respondWith: () => assert.fail('Private/config request intercepted') });
+  }
 });
