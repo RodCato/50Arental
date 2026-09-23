@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-export async function initializeCloud({ fetcher = fetch, factory = createClient, storage = sessionStorage } = {}) {
+export async function initializeCloud({ fetcher = fetch, factory = createClient, storage = localStorage } = {}) {
   const response = await fetcher('./cloud-config.json', { cache: 'no-store' });
   if (!response.ok) throw new Error('Cloud configuration unavailable.');
   const config = await response.json();

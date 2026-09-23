@@ -48,7 +48,7 @@ async function start() {
     logout.addEventListener('click', () => action(async () => {
       const result = await auth.signOut();
       if (result.error) throw result.error;
-      user = null; message.textContent = 'Signed out on this browser tab. Local ledger is unchanged.';
+      user = null; message.textContent = 'Signed out on this device/browser. Local ledger is unchanged.';
     }));
     check.addEventListener('click', () => action(async () => { message.textContent = await checkFoundation(client); }));
   } catch { status.textContent = 'Cloud unavailable or offline. Sign in to access an activated cloud ledger.'; }

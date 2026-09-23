@@ -41,8 +41,10 @@ export async function cutoverUI(client){
   if(next?.id===m.owner){device??=new DeviceLedger({storage:localStorage,repo:repository(client,next.id),owner:next.id,onChange:()=>render()});device.unlock(next.id);if(device.view()&&!editing())app.set(device.view());if(lease&&!editing()){await device.refresh();if(device.view())app.set(device.view());}}
   else {device?.lock();app.set(app.empty());}
  }render();}
- client.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>identity(session?.user??null),0)});
- const {data,error}=await client.auth.getUser();const cached=error&&(!navigator.onLine||error.name==='AuthRetryableFetchError')?(await client.auth.getSession()).data?.session:null;await identity(data?.user??cached?.user??null);
+ let identityVersion=0;
+ async function restoreIdentity(){const version=++identityVersion;const {data,error}=await client.auth.getUser();if(version===identityVersion)await identity(error?null:data?.user??null);}
+ client.auth.onAuthStateChange((_event,session)=>{if(!session){identityVersion++;void identity(null);}else setTimeout(()=>restoreIdentity(),0)});
+ await restoreIdentity();
  window.addEventListener('focus',()=>{if(active()&&device?.unlocked&&lease&&!editing())refresh.click()});window.addEventListener('online',()=>{if(active()&&device?.unlocked&&lease&&!editing())refresh.click()});
  window.addEventListener('storage',e=>{if(e.key===MODE)location.reload()});render();return {identity};
 }

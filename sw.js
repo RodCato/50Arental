@@ -1,4 +1,4 @@
-const CACHE_NAME='50a-ledger-shell-v13';
+const CACHE_NAME='50a-ledger-shell-v14';
 const SHELL=['./','./index.html','./styles.css','./date-utils.js','./waterdrop-utils.js','./recurring-utils.js','./app.js','./finance-utils.js','./backup-utils.js','./backup-storage.js','./backup-boot.js','./cloud-foundation.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('50a-ledger-shell-')&&key!==CACHE_NAME).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
