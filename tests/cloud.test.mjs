@@ -77,7 +77,7 @@ test('build excludes private environment values and serves complete PWA shell', 
 test('service worker does not intercept Auth, config, or session-bearing API requests', async () => {
   const handlers = {};
   vm.runInNewContext(await readFile('sw.js', 'utf8'), { URL, self: { location: { origin: 'https://ledger.example.test', href: 'https://ledger.example.test/sw.js' }, addEventListener: (name, callback) => { handlers[name] = callback; } } });
-  for (const url of ['https://example.supabase.co/auth/v1/token', 'https://example.supabase.co/auth/v1/user', 'https://ledger.example.test/cloud-config.json', 'https://ledger.example.test/auth/v1/token']) {
+  for (const url of ['https://example.supabase.co/auth/v1/token', 'https://example.supabase.co/auth/v1/user', 'https://example.supabase.co/storage/v1/object/50a-evidence/private.webp', 'https://example.supabase.co/storage/v1/object/sign/50a-evidence/private.webp?token=synthetic', 'https://ledger.example.test/cloud-config.json', 'https://ledger.example.test/auth/v1/token']) {
     for (const method of ['GET', 'POST']) handlers.fetch({ request: { url, method }, respondWith: () => assert.fail('Private/config request intercepted') });
   }
 });
