@@ -58,3 +58,35 @@ test('standalone CLI is read-only, sanitized, and hashes the original file',asyn
 test('background saves are blocked while restore owns the ledger',()=>{const source=fs.readFileSync(path.join(__dirname,'../app.js'),'utf8'),save=source.split('\n').find(l=>l.startsWith('function save('));let writes=0;const context={backupInProgress:true,markSyncDirty:()=>{writes++},localStorage:{setItem:()=>{writes++}},render:()=>{writes++}};vm.createContext(context);vm.runInContext(save,context);assert.throws(()=>vm.runInContext('save()',context),/Restore in progress/);assert.equal(writes,0)});
 test('editing settings preserves restored Waterdrop history',()=>{const f=fixture(),source=fs.readFileSync(path.join(__dirname,'../app.js'),'utf8'),wrapper=source.split('\n').find(l=>l.startsWith('const syncPaybackSettings='));const before=U.clone(f.state.settings.waterdropPayback.waterdropCompletions);const context={state:f.state,syncSettingsFromInputs:()=>{f.state.settings.waterdropPayback={gallonsLogged:2,baselineCostPerGallon:1.5,systemCost:73.35,breakEvenGallon:59}}};vm.createContext(context);vm.runInContext(wrapper+';syncSettingsFromInputs()',context);assert.deepEqual(f.state.settings.waterdropPayback.waterdropCompletions,before);assert.equal(f.state.settings.waterdropPayback.baselineCostPerGallon,1.5)});
 test('portable artifact omits device/account synchronization identity',async()=>{const b=await backup(),serialized=JSON.stringify(b);assert.doesNotMatch(serialized,/PRIVATE_CLIENT_ID|PRIVATE_DEVICE|private@example\.test|"googleSync"|"syncMeta"/);assert.equal(b.provenance.recordTimestamps.length,1);assert.equal(b.provenance.tombstones.length,1)});
+test('real-representation regression: blank adjustment survives load/export/restore/reload/re-export with identical finances',async()=>{
+ const f=require('./backup-fixture.cjs').historicalNumericFixture(),Finance=require('../finance-utils.js');
+ assert.equal(f.state.transactions[5].items[0].adjustment,'');assert.equal(typeof f.state.transactions[5].items[0].adjustment,'string');
+ const before=U.clone(f.state),totals=Finance.expenses(f.state.transactions.flatMap(t=>t.items)),b=await U.create(f.state,f.get),a=adapter(f.state);
+ await U.validate(b);assert.deepEqual(f.state,before);await a.coordinator.stage(b,f.state,f.get);await a.coordinator.recover();await a.coordinator.completeStartup();
+ const source=fs.readFileSync(path.join(__dirname,'../app.js'),'utf8'),line=name=>source.split('\n').find(l=>l.startsWith(`function ${name}(`));const context={localStorage:{getItem:()=>a.io.read()},JSON};vm.createContext(context);vm.runInContext(source.split('\n').slice(0,7).join('\n')+'\n'+line('normalizeSettings')+'\n'+line('load')+'\nvar reopened=load();',context);
+ const next=await U.create(context.reopened,id=>a.io.attachment(id,context.reopened.attachmentGeneration));await U.validate(next);assert.deepEqual(next.state,b.state);assert.equal(next.state.transactions[5].items[0].adjustment,'');assert.deepEqual(Finance.expenses(next.state.transactions.flatMap(t=>t.items)),totals);
+});
+test('optional legacy zeros preserve exact representations and associated-payment/deposit semantics',async()=>{
+ for(const value of ['',null,undefined,'0',0]){
+  const f=fixture(),t=f.state.transactions[0];for(const k of ['adjustment','depositRefunded']){if(value===undefined)delete t.items[0][k];else t.items[0][k]=value}if(value===undefined)delete t.oneTimeAmount;else t.oneTimeAmount=value;
+  f.state.transactions[1].items[2].depositRefunded=value;
+  const b=await U.create(f.state,f.get);await U.validate(b);assert.deepEqual(b.state.transactions,U.portableState(f.state).transactions);assert.equal((await U.validate(b)).summary.months['2026-09'].utilities,123);assert.equal((await U.validate(b)).summary.actualExpenses,278);
+ }
+});
+test('strict decimal representations apply consistently to every money/count field',async()=>{
+ const f=fixture();f.state.budget='400.00';for(const k of ['rent50a','forgottenEssentialsBudget','joshRent','joshStayDays','proratedRent','adminFee','depositAmount','depositRefunded'])f.state.settings[k]=String(f.state.settings[k]);for(const a of f.state.settings.joshAdjustments)a.amount=String(a.amount);for(const k of ['gallonsLogged','baselineCostPerGallon','systemCost','breakEvenGallon'])f.state.settings.waterdropPayback[k]=String(f.state.settings.waterdropPayback[k]);for(const b of f.state.recurringCharges)b.amount=String(b.amount);f.state.transactions[0].oneTimeAmount='3e1';f.state.transactions[1].items[1].giftCardOffset='5.00';
+ const b=await U.create(f.state,f.get);assert.equal((await U.validate(b)).summary.actualExpenses,253);assert.equal(b.state.transactions[0].oneTimeAmount,'3e1');assert.equal((await U.validate(b)).summary.monthlySavings,652.38);
+});
+test('malformed coercions and nonfinite numbers are never turned into optional zero',async()=>{
+ for(const value of [NaN,Infinity,-Infinity,'NaN','Infinity','refund','0x10','0b10','1_000','1,00','1.2.3',' ',' 0','0 ','1e999',false,true,[],{},-1,'-1']){
+  for(const field of ['adjustment','depositRefunded','oneTimeAmount']){const f=fixture();if(field==='oneTimeAmount')f.state.transactions[0][field]=value;else f.state.transactions[0].items[0][field]=value;await assert.rejects(()=>U.create(f.state,f.get),/invalid number|nonfinite number/)}
+ }
+});
+test('empty optional policy does not spread to required money/counts or optional metadata',async()=>{
+ for(const value of ['',null,undefined]){
+  const edits=[f=>f.state.transactions[0].items[0].amount=value,f=>f.state.recurringCharges[0].amount=value,f=>f.state.budget=value,f=>f.state.settings.joshRent=value,f=>f.state.settings.joshStayDays=value,f=>f.state.settings.waterdropPayback.systemCost=value,f=>f.state.settings.joshAdjustments[0].amount=value];
+  if(value!==undefined)edits.push(f=>f.state.transactions[0].items[0].giftCardOffset=value);
+  for(const edit of edits){const f=fixture();edit(f);await assert.rejects(()=>U.create(f.state,f.get),/invalid number/)}
+ }
+ for(const [field,value] of [['oneTimeAmount',124],['depositRefunded',124]]){const f=fixture();if(field==='oneTimeAmount')f.state.transactions[0][field]=value;else f.state.transactions[0].items[0][field]=value;await assert.rejects(()=>U.create(f.state,f.get),/exceeds/)}
+});

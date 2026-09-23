@@ -5,7 +5,7 @@ import {createRequire} from 'node:module';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 const require=createRequire(import.meta.url);
-const {fixture}=require('../tests/backup-fixture.cjs');
+const {historicalNumericFixture:fixture}=require('../tests/backup-fixture.cjs');
 const U=require('../backup-utils.js');
 const playwright=process.env.PLAYWRIGHT_MODULE||'playwright';
 const {chromium}=require(playwright);
@@ -23,7 +23,7 @@ try{
  console.log('Startup ready');
  // A fresh app's real default dataset must also be exportable.
  const fresh=await page.evaluate(async()=>{const b=await BackupUtils.create(state,attachmentGet);return (await BackupUtils.validate(b)).summary});assert.ok(fresh.transactions>0);console.log('Fresh export passed');
- const f=fixture(),b=await U.create(f.state,f.get);const data=JSON.stringify(b);
+ const f=fixture(),b=await U.create(f.state,f.get);assert.equal(b.state.transactions[5].items[0].adjustment,'');const data=JSON.stringify(b);
  page.on('dialog',dialog=>dialog.accept());
  await page.locator('#importInput').setInputFiles({name:'synthetic-v3.json',mimeType:'application/json',buffer:Buffer.from(data)});
  await page.waitForFunction(()=>document.querySelector('#backupStatus')?.textContent.includes('Restore successful'));console.log('Restore reopened');
