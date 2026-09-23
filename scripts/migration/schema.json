@@ -1,0 +1,1572 @@
+{
+  "rls": [
+    {
+      "table": "attachments",
+      "enabled": true
+    },
+    {
+      "table": "benchmark_adjustments",
+      "enabled": true
+    },
+    {
+      "table": "property_condition",
+      "enabled": true
+    },
+    {
+      "table": "recurring_charges",
+      "enabled": true
+    },
+    {
+      "table": "transaction_items",
+      "enabled": true
+    },
+    {
+      "table": "transactions",
+      "enabled": true
+    },
+    {
+      "table": "user_settings",
+      "enabled": true
+    },
+    {
+      "table": "water_events",
+      "enabled": true
+    }
+  ],
+  "columns": [
+    {
+      "data_type": "uuid",
+      "table_name": "attachments",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "gen_random_uuid()",
+      "ordinal_position": 1,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "attachments",
+      "column_name": "owner_id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 2,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "attachments",
+      "column_name": "transaction_id",
+      "is_nullable": "YES",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 3,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "attachments",
+      "column_name": "property_condition_id",
+      "is_nullable": "YES",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 4,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "attachments",
+      "column_name": "storage_bucket",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "'50a-evidence'::text",
+      "ordinal_position": 5,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "attachments",
+      "column_name": "storage_path",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 6,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "attachments",
+      "column_name": "original_filename",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 7,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "attachments",
+      "column_name": "mime_type",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 8,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "bigint",
+      "table_name": "attachments",
+      "column_name": "size_bytes",
+      "is_nullable": "NO",
+      "numeric_scale": 0,
+      "column_default": null,
+      "ordinal_position": 9,
+      "numeric_precision": 64
+    },
+    {
+      "data_type": "text",
+      "table_name": "attachments",
+      "column_name": "attachment_type",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 10,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "attachments",
+      "column_name": "created_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 11,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "attachments",
+      "column_name": "updated_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 12,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "benchmark_adjustments",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "gen_random_uuid()",
+      "ordinal_position": 1,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "benchmark_adjustments",
+      "column_name": "owner_id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 2,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "benchmark_adjustments",
+      "column_name": "label",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 3,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "benchmark_adjustments",
+      "column_name": "amount",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": null,
+      "ordinal_position": 4,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "integer",
+      "table_name": "benchmark_adjustments",
+      "column_name": "position",
+      "is_nullable": "NO",
+      "numeric_scale": 0,
+      "column_default": "0",
+      "ordinal_position": 5,
+      "numeric_precision": 32
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "benchmark_adjustments",
+      "column_name": "created_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 6,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "benchmark_adjustments",
+      "column_name": "updated_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 7,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "property_condition",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "gen_random_uuid()",
+      "ordinal_position": 1,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "property_condition",
+      "column_name": "owner_id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 2,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "property_condition",
+      "column_name": "room",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 3,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "property_condition",
+      "column_name": "phase",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 4,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "date",
+      "table_name": "property_condition",
+      "column_name": "condition_date",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 5,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "property_condition",
+      "column_name": "notes",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "''::text",
+      "ordinal_position": 6,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "property_condition",
+      "column_name": "created_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 7,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "property_condition",
+      "column_name": "updated_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 8,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "recurring_charges",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "gen_random_uuid()",
+      "ordinal_position": 1,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "recurring_charges",
+      "column_name": "owner_id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 2,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "recurring_charges",
+      "column_name": "name",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 3,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "recurring_charges",
+      "column_name": "amount",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": null,
+      "ordinal_position": 4,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "text",
+      "table_name": "recurring_charges",
+      "column_name": "category",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 5,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "recurring_charges",
+      "column_name": "kind",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 6,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "recurring_charges",
+      "column_name": "utility_type",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "''::text",
+      "ordinal_position": 7,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "recurring_charges",
+      "column_name": "active",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "true",
+      "ordinal_position": 8,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "recurring_charges",
+      "column_name": "created_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 9,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "recurring_charges",
+      "column_name": "updated_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 10,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "transaction_items",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "gen_random_uuid()",
+      "ordinal_position": 1,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "transaction_items",
+      "column_name": "owner_id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 2,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "transaction_items",
+      "column_name": "transaction_id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 3,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "integer",
+      "table_name": "transaction_items",
+      "column_name": "position",
+      "is_nullable": "NO",
+      "numeric_scale": 0,
+      "column_default": "0",
+      "ordinal_position": 4,
+      "numeric_precision": 32
+    },
+    {
+      "data_type": "text",
+      "table_name": "transaction_items",
+      "column_name": "description",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 5,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "transaction_items",
+      "column_name": "amount",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": null,
+      "ordinal_position": 6,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "text",
+      "table_name": "transaction_items",
+      "column_name": "category",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 7,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "transaction_items",
+      "column_name": "bucket",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 8,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "transaction_items",
+      "column_name": "setup_class",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "'none'::text",
+      "ordinal_position": 9,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "transaction_items",
+      "column_name": "status",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "'kept'::text",
+      "ordinal_position": 10,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "transaction_items",
+      "column_name": "adjustment",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": "0",
+      "ordinal_position": 11,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "text",
+      "table_name": "transaction_items",
+      "column_name": "deposit_status",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "'held'::text",
+      "ordinal_position": 12,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "transaction_items",
+      "column_name": "deposit_refunded",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": "0",
+      "ordinal_position": 13,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "transaction_items",
+      "column_name": "move_in",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "false",
+      "ordinal_position": 14,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "transaction_items",
+      "column_name": "prorated",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "false",
+      "ordinal_position": 15,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "transaction_items",
+      "column_name": "estimated",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "false",
+      "ordinal_position": 16,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "transaction_items",
+      "column_name": "recurring",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "false",
+      "ordinal_position": 17,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "transaction_items",
+      "column_name": "gift_card_offset",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": "0",
+      "ordinal_position": 18,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "transaction_items",
+      "column_name": "created_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 19,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "transaction_items",
+      "column_name": "updated_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 20,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "transactions",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "gen_random_uuid()",
+      "ordinal_position": 1,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "transactions",
+      "column_name": "owner_id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 2,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "transactions",
+      "column_name": "merchant",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 3,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "date",
+      "table_name": "transactions",
+      "column_name": "transaction_date",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 4,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "transactions",
+      "column_name": "notes",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "''::text",
+      "ordinal_position": 5,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "transactions",
+      "column_name": "recurring_charge_id",
+      "is_nullable": "YES",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 6,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "transactions",
+      "column_name": "one_time_amount",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": "0",
+      "ordinal_position": 7,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "text",
+      "table_name": "transactions",
+      "column_name": "system_key",
+      "is_nullable": "YES",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 8,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "transactions",
+      "column_name": "sample_key",
+      "is_nullable": "YES",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 9,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "transactions",
+      "column_name": "created_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 10,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "transactions",
+      "column_name": "updated_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 11,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "user_settings",
+      "column_name": "owner_id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 1,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "user_settings",
+      "column_name": "setup_budget",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": "400",
+      "ordinal_position": 2,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "user_settings",
+      "column_name": "forgotten_essentials_budget",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": "100",
+      "ordinal_position": 3,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "user_settings",
+      "column_name": "josh_rent",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": "1450",
+      "ordinal_position": 4,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "integer",
+      "table_name": "user_settings",
+      "column_name": "josh_stay_days",
+      "is_nullable": "NO",
+      "numeric_scale": 0,
+      "column_default": "68",
+      "ordinal_position": 5,
+      "numeric_precision": 32
+    },
+    {
+      "data_type": "date",
+      "table_name": "user_settings",
+      "column_name": "move_in_date",
+      "is_nullable": "YES",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 6,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "user_settings",
+      "column_name": "prorated_rent",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": "321.60",
+      "ordinal_position": 7,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "user_settings",
+      "column_name": "admin_fee",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": "150",
+      "ordinal_position": 8,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "user_settings",
+      "column_name": "deposit_amount",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": "800",
+      "ordinal_position": 9,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "text",
+      "table_name": "user_settings",
+      "column_name": "deposit_status",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "'held'::text",
+      "ordinal_position": 10,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "user_settings",
+      "column_name": "deposit_refunded",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": "0",
+      "ordinal_position": 11,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "text",
+      "table_name": "user_settings",
+      "column_name": "waterdrop_name",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "'Waterdrop'::text",
+      "ordinal_position": 12,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "user_settings",
+      "column_name": "waterdrop_baseline_cost_per_gallon",
+      "is_nullable": "NO",
+      "numeric_scale": 4,
+      "column_default": "1.25",
+      "ordinal_position": 13,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "user_settings",
+      "column_name": "waterdrop_system_cost",
+      "is_nullable": "NO",
+      "numeric_scale": 2,
+      "column_default": "73.35",
+      "ordinal_position": 14,
+      "numeric_precision": 12
+    },
+    {
+      "data_type": "integer",
+      "table_name": "user_settings",
+      "column_name": "waterdrop_break_even_gallon",
+      "is_nullable": "NO",
+      "numeric_scale": 0,
+      "column_default": "59",
+      "ordinal_position": 15,
+      "numeric_precision": 32
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "user_settings",
+      "column_name": "created_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 16,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "user_settings",
+      "column_name": "updated_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 17,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "water_events",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "gen_random_uuid()",
+      "ordinal_position": 1,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "water_events",
+      "column_name": "owner_id",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 2,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "water_events",
+      "column_name": "completed_at",
+      "is_nullable": "YES",
+      "numeric_scale": null,
+      "column_default": null,
+      "ordinal_position": 3,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "integer",
+      "table_name": "water_events",
+      "column_name": "gallons",
+      "is_nullable": "NO",
+      "numeric_scale": 0,
+      "column_default": "1",
+      "ordinal_position": 4,
+      "numeric_precision": 32
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "water_events",
+      "column_name": "legacy",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "false",
+      "ordinal_position": 5,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "water_events",
+      "column_name": "created_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 6,
+      "numeric_precision": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "water_events",
+      "column_name": "updated_at",
+      "is_nullable": "NO",
+      "numeric_scale": null,
+      "column_default": "now()",
+      "ordinal_position": 7,
+      "numeric_precision": null
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "DELETE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "attachments",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_delete",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "attachments",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_insert",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "attachments",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_select",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "attachments",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_update",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "benchmark_adjustments",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_delete",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "benchmark_adjustments",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_insert",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "benchmark_adjustments",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_select",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "benchmark_adjustments",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_update",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "property_condition",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_delete",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "property_condition",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_insert",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "property_condition",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_select",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "property_condition",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_update",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "recurring_charges",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_delete",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "recurring_charges",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_insert",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "recurring_charges",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_select",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "recurring_charges",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_update",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "transaction_items",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_delete",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "transaction_items",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_insert",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "transaction_items",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_select",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "transaction_items",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_update",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "transactions",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_delete",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "transactions",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_insert",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "transactions",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_select",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "transactions",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_update",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "user_settings",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_delete",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "user_settings",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_insert",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "user_settings",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_select",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "user_settings",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_update",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "DELETE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "water_events",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_delete",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "qual": null,
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "water_events",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_insert",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    },
+    {
+      "cmd": "SELECT",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "water_events",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_select",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "qual": "(owner_id = ( SELECT auth.uid() AS uid))",
+      "roles": [
+        "authenticated"
+      ],
+      "tablename": "water_events",
+      "permissive": "PERMISSIVE",
+      "policyname": "owner_update",
+      "with_check": "(owner_id = ( SELECT auth.uid() AS uid))"
+    }
+  ],
+  "triggers": [
+    "CREATE TRIGGER ledger_timestamps BEFORE INSERT OR UPDATE ON public.attachments FOR EACH ROW EXECUTE FUNCTION ledger_timestamps()",
+    "CREATE TRIGGER ledger_timestamps BEFORE INSERT OR UPDATE ON public.benchmark_adjustments FOR EACH ROW EXECUTE FUNCTION ledger_timestamps()",
+    "CREATE TRIGGER ledger_timestamps BEFORE INSERT OR UPDATE ON public.property_condition FOR EACH ROW EXECUTE FUNCTION ledger_timestamps()",
+    "CREATE TRIGGER ledger_timestamps BEFORE INSERT OR UPDATE ON public.recurring_charges FOR EACH ROW EXECUTE FUNCTION ledger_timestamps()",
+    "CREATE TRIGGER ledger_timestamps BEFORE INSERT OR UPDATE ON public.transaction_items FOR EACH ROW EXECUTE FUNCTION ledger_timestamps()",
+    "CREATE TRIGGER ledger_timestamps BEFORE INSERT OR UPDATE ON public.transactions FOR EACH ROW EXECUTE FUNCTION ledger_timestamps()",
+    "CREATE TRIGGER ledger_timestamps BEFORE INSERT OR UPDATE ON public.user_settings FOR EACH ROW EXECUTE FUNCTION ledger_timestamps()",
+    "CREATE TRIGGER ledger_timestamps BEFORE INSERT OR UPDATE ON public.water_events FOR EACH ROW EXECUTE FUNCTION ledger_timestamps()"
+  ],
+  "constraints": [
+    {
+      "definition": "CHECK ((((attachment_type = 'receipt'::text) AND (transaction_id IS NOT NULL) AND (property_condition_id IS NULL)) OR ((attachment_type = 'property'::text) AND (transaction_id IS NULL) AND (property_condition_id IS NOT NULL))))",
+      "table_name": "attachments"
+    },
+    {
+      "definition": "CHECK (((size_bytes >= 0) AND (size_bytes <= 20971520)))",
+      "table_name": "attachments"
+    },
+    {
+      "definition": "CHECK ((attachment_type = ANY (ARRAY['receipt'::text, 'property'::text])))",
+      "table_name": "attachments"
+    },
+    {
+      "definition": "CHECK ((mime_type = ANY (ARRAY['image/webp'::text, 'image/jpeg'::text, 'image/png'::text])))",
+      "table_name": "attachments"
+    },
+    {
+      "definition": "CHECK ((storage_bucket = '50a-evidence'::text))",
+      "table_name": "attachments"
+    },
+    {
+      "definition": "CHECK ((storage_path ~ (((((('^'::text || (owner_id)::text) || '/'::text) ||\nCASE\n    WHEN (attachment_type = 'receipt'::text) THEN 'receipts'::text\n    ELSE 'property'::text\nEND) || '/'::text) || (id)::text) || '\\.(webp|jpg|jpeg|png)$'::text)))",
+      "table_name": "attachments"
+    },
+    {
+      "definition": "FOREIGN KEY (owner_id) REFERENCES auth.users(id) ON DELETE CASCADE",
+      "table_name": "attachments"
+    },
+    {
+      "definition": "FOREIGN KEY (owner_id, property_condition_id) REFERENCES property_condition(owner_id, id) ON DELETE CASCADE",
+      "table_name": "attachments"
+    },
+    {
+      "definition": "FOREIGN KEY (owner_id, transaction_id) REFERENCES transactions(owner_id, id) ON DELETE CASCADE",
+      "table_name": "attachments"
+    },
+    {
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "attachments"
+    },
+    {
+      "definition": "UNIQUE (storage_path)",
+      "table_name": "attachments"
+    },
+    {
+      "definition": "CHECK ((\"position\" >= 0))",
+      "table_name": "benchmark_adjustments"
+    },
+    {
+      "definition": "CHECK ((amount >= (0)::numeric))",
+      "table_name": "benchmark_adjustments"
+    },
+    {
+      "definition": "FOREIGN KEY (owner_id) REFERENCES auth.users(id) ON DELETE CASCADE",
+      "table_name": "benchmark_adjustments"
+    },
+    {
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "benchmark_adjustments"
+    },
+    {
+      "definition": "CHECK ((phase = ANY (ARRAY['move-in'::text, 'move-out'::text])))",
+      "table_name": "property_condition"
+    },
+    {
+      "definition": "FOREIGN KEY (owner_id) REFERENCES auth.users(id) ON DELETE CASCADE",
+      "table_name": "property_condition"
+    },
+    {
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "property_condition"
+    },
+    {
+      "definition": "UNIQUE (owner_id, id)",
+      "table_name": "property_condition"
+    },
+    {
+      "definition": "CHECK ((amount >= (0)::numeric))",
+      "table_name": "recurring_charges"
+    },
+    {
+      "definition": "CHECK ((kind = ANY (ARRAY['fixed'::text, 'estimated'::text])))",
+      "table_name": "recurring_charges"
+    },
+    {
+      "definition": "CHECK ((length(TRIM(BOTH FROM name)) > 0))",
+      "table_name": "recurring_charges"
+    },
+    {
+      "definition": "FOREIGN KEY (owner_id) REFERENCES auth.users(id) ON DELETE CASCADE",
+      "table_name": "recurring_charges"
+    },
+    {
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "recurring_charges"
+    },
+    {
+      "definition": "UNIQUE (owner_id, id)",
+      "table_name": "recurring_charges"
+    },
+    {
+      "definition": "CHECK ((\"position\" >= 0))",
+      "table_name": "transaction_items"
+    },
+    {
+      "definition": "CHECK (((deposit_refunded >= (0)::numeric) AND (deposit_refunded <= amount)))",
+      "table_name": "transaction_items"
+    },
+    {
+      "definition": "CHECK ((adjustment >= (0)::numeric))",
+      "table_name": "transaction_items"
+    },
+    {
+      "definition": "CHECK ((amount >= (0)::numeric))",
+      "table_name": "transaction_items"
+    },
+    {
+      "definition": "CHECK ((bucket = ANY (ARRAY['housing_recurring'::text, 'utilities'::text, 'housing_one_time'::text, 'groceries'::text, 'refundable_deposit'::text, 'excluded'::text])))",
+      "table_name": "transaction_items"
+    },
+    {
+      "definition": "CHECK ((deposit_status = ANY (ARRAY['held'::text, 'refunded'::text, 'partially_refunded'::text, 'forfeited'::text])))",
+      "table_name": "transaction_items"
+    },
+    {
+      "definition": "CHECK ((gift_card_offset >= (0)::numeric))",
+      "table_name": "transaction_items"
+    },
+    {
+      "definition": "CHECK ((length(TRIM(BOTH FROM description)) > 0))",
+      "table_name": "transaction_items"
+    },
+    {
+      "definition": "CHECK ((setup_class = ANY (ARRAY['move_in_essential'::text, 'forgotten_essential'::text, 'post_move_improvement'::text, 'lease_service_setup'::text, 'none'::text])))",
+      "table_name": "transaction_items"
+    },
+    {
+      "definition": "CHECK ((status = ANY (ARRAY['kept'::text, 'returned'::text, 'refunded'::text, 'reused'::text, 'cancelled'::text, 'avoided'::text])))",
+      "table_name": "transaction_items"
+    },
+    {
+      "definition": "FOREIGN KEY (owner_id) REFERENCES auth.users(id) ON DELETE CASCADE",
+      "table_name": "transaction_items"
+    },
+    {
+      "definition": "FOREIGN KEY (owner_id, transaction_id) REFERENCES transactions(owner_id, id) ON DELETE CASCADE",
+      "table_name": "transaction_items"
+    },
+    {
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "transaction_items"
+    },
+    {
+      "definition": "CHECK ((length(TRIM(BOTH FROM merchant)) > 0))",
+      "table_name": "transactions"
+    },
+    {
+      "definition": "CHECK ((one_time_amount >= (0)::numeric))",
+      "table_name": "transactions"
+    },
+    {
+      "definition": "FOREIGN KEY (owner_id) REFERENCES auth.users(id) ON DELETE CASCADE",
+      "table_name": "transactions"
+    },
+    {
+      "definition": "FOREIGN KEY (owner_id, recurring_charge_id) REFERENCES recurring_charges(owner_id, id) ON DELETE RESTRICT",
+      "table_name": "transactions"
+    },
+    {
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "transactions"
+    },
+    {
+      "definition": "UNIQUE (owner_id, id)",
+      "table_name": "transactions"
+    },
+    {
+      "definition": "CHECK (((deposit_refunded >= (0)::numeric) AND (deposit_refunded <= deposit_amount)))",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "CHECK ((admin_fee >= (0)::numeric))",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "CHECK ((deposit_amount >= (0)::numeric))",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "CHECK ((deposit_status = ANY (ARRAY['held'::text, 'refunded'::text, 'partially_refunded'::text, 'forfeited'::text])))",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "CHECK ((forgotten_essentials_budget >= (0)::numeric))",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "CHECK ((josh_rent >= (0)::numeric))",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "CHECK ((josh_stay_days > 0))",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "CHECK ((prorated_rent >= (0)::numeric))",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "CHECK ((setup_budget >= (0)::numeric))",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "CHECK ((waterdrop_baseline_cost_per_gallon >= (0)::numeric))",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "CHECK ((waterdrop_break_even_gallon > 0))",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "CHECK ((waterdrop_system_cost >= (0)::numeric))",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "FOREIGN KEY (owner_id) REFERENCES auth.users(id) ON DELETE CASCADE",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "PRIMARY KEY (owner_id)",
+      "table_name": "user_settings"
+    },
+    {
+      "definition": "CHECK (((completed_at IS NOT NULL) OR legacy))",
+      "table_name": "water_events"
+    },
+    {
+      "definition": "CHECK ((gallons > 0))",
+      "table_name": "water_events"
+    },
+    {
+      "definition": "FOREIGN KEY (owner_id) REFERENCES auth.users(id) ON DELETE CASCADE",
+      "table_name": "water_events"
+    },
+    {
+      "definition": "PRIMARY KEY (id)",
+      "table_name": "water_events"
+    }
+  ]
+}

@@ -107,7 +107,7 @@ The transaction save button explicitly says **Save payment only** or **Save paym
 
 **Supabase is NOT YET the authoritative data store. Local storage remains authoritative until the migration phase is explicitly completed.** Nothing uploads on sign-in. All existing transaction/recurring/dashboard code (`app.js`, `recurring-utils.js`), IndexedDB images, local import/export and Google controls remain active and unchanged. Google Drive sync is **LEGACY / pending retirement**; do not treat it as the new multi-device architecture.
 
-Architecture: static PWA → separate Supabase Auth/client boundary → owner-protected Postgres tables and private evidence Storage. `cloud/client.mjs` owns client/session/Auth; `cloud/data.mjs` only reads connectivity metadata; `cloud/ui.mjs` connects the small Settings panel. No financial repository, sync, OCR, Alexa endpoint or migration importer exists yet.
+Architecture: static PWA → separate Supabase Auth/client boundary → owner-protected Postgres tables and private evidence Storage. `cloud/client.mjs` owns client/session/Auth; `cloud/data.mjs` only reads connectivity metadata; `cloud/ui.mjs` connects the small Settings panel. No application financial repository, sync, OCR or Alexa endpoint is enabled. The separately invoked [certified Phase 2A importer](MIGRATION.md) creates a verified cloud copy without changing application behavior.
 
 ### Public configuration and Vercel
 
@@ -150,7 +150,7 @@ npm run test:rls
 
 ### Schema mapping
 
-All personal rows use UUIDs (default `gen_random_uuid()`; explicit browser `crypto.randomUUID()` IDs will also work), `owner_id → auth.users`, and server-maintained `created_at`/`updated_at`. Client-supplied timestamp changes are overridden; created_at is preserved on update. Historical event dates remain separate. No local IDs have been converted yet.
+All personal rows use UUIDs (default `gen_random_uuid()`; explicit browser `crypto.randomUUID()` IDs will also work), `owner_id → auth.users`, and server-maintained `created_at`/`updated_at`. Client-supplied timestamp changes are overridden; created_at is preserved on update. Historical event dates remain separate. The dedicated Phase 2A importer deterministically maps certified source IDs; application-local IDs remain unchanged.
 
 | Local model | Future cloud home / mapping |
 | --- | --- |
@@ -178,7 +178,7 @@ Check cloud access authenticates the session, reads table access without fetchin
 
 The service-worker shell version is bumped to v10 to deliver the added bundle and sign-in markup. It caches only allowlisted same-origin shell assets; `cloud-config.json`, Auth and Storage requests are not intercepted/cached. The cloud config has `Cache-Control: no-store`; the worker script has `no-cache`. Offline/cloud failures leave the local ledger usable.
 
-### Proposed Phase 2 (not implemented)
+### Phase 2 roadmap
 
 1. Back up **each device** with the existing portable export, including actual IndexedDB blobs; inventory counts, legacy inline images, date formats and per-device differences. Keep immutable recovery copies.
 2. Select a signed-in owner and explicitly choose/merge the authoritative source dataset. Resolve desktop/phone conflicts in a dry-run preview; never let last-writer silently overwrite the other device.
