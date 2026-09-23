@@ -36,3 +36,13 @@
 .cloud-locked dialog{display:none!important}
 
 .cloud-locked #settings .settings-card > :not(#cloudFoundation){display:none!important}
+
+.legacy-recovery{min-width:0;border-top:1px solid var(--line);color:var(--muted)}
+.legacy-recovery>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;padding:10px 0;cursor:pointer;list-style:none}
+.legacy-recovery>summary::-webkit-details-marker{display:none}
+.legacy-recovery>summary::after{content:'›';font-size:1.3rem;transition:transform .15s}
+.legacy-recovery[open]>summary::after{transform:rotate(90deg)}
+.legacy-recovery>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.legacy-recovery .settings-section{min-width:0;margin-top:8px}
+.legacy-recovery h3{margin:0;color:var(--text);font-size:1rem}
+.legacy-recovery input,.legacy-recovery button{min-width:0;max-width:100%}

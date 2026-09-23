@@ -217,24 +217,30 @@
           <div class="sync-actions"><button id="cloudCheck" type="button" class="ghost" hidden>Check cloud access</button><button id="cloudSignOut" type="button" class="ghost" hidden>Sign out</button></div>
           <p id="cloudMessage" class="settings-help" role="status" aria-live="polite"></p>
         </div>
-        <div class="settings-section" id="googleSyncSection">
-          <p class="eyebrow">GOOGLE SYNC</p>
-          <p id="syncStatus" class="settings-help">Google not connected · local data remains available offline.</p>
-          <label>Google OAuth web client ID
-            <input id="googleClientIdInput" type="text" inputmode="text" autocomplete="off" placeholder="1234567890-....apps.googleusercontent.com" />
-          </label>
-          <p class="settings-help">Uses Google Drive private app data. Scope: Drive appDataFolder plus basic account identity. Tokens stay in this browser session, not localStorage.</p>
-          <div class="sync-actions"><button id="connectGoogleBtn" type="button" class="accent">Connect Google</button><button id="syncNowBtn" type="button" class="ghost">Sync now</button><button id="restoreGoogleBtn" type="button" class="ghost">Restore from Google</button><button id="disconnectGoogleBtn" type="button" class="ghost">Disconnect</button></div>
-          <p id="syncLastSuccess" class="settings-help">No successful sync yet.</p>
-          <p class="settings-help">Data is stored on this device. Use Backup to protect or move your ledger. Google sync is private to your account; it does not replace manual backups.</p>
-        </div>
         <button id="saveSettingsBtn" class="accent">Save</button>
-        <button id="exportBtn" class="ghost">Export 50A Backup</button>
-        <button id="recoveryExportBtn" class="ghost">Export pre-import recovery snapshot</button>
-        <p id="backupStatus" role="status" aria-live="polite"></p>
-        <p class="settings-help">Portable backup includes ledger data and stored images.</p>
-        <label class="import-label">Import 50A Backup<input id="importInput" type="file" accept="application/json" /></label>
-        <button id="clearBtn" class="danger">Clear all local data</button>
+        <details id="legacyRecoveryTools" class="legacy-recovery">
+          <summary>Legacy &amp; recovery tools</summary>
+          <div class="settings-section">
+            <h3>Portable backup &amp; recovery</h3>
+            <button id="exportBtn" class="ghost">Export 50A Backup</button>
+            <button id="recoveryExportBtn" class="ghost">Export pre-import recovery snapshot</button>
+            <p id="backupStatus" role="status" aria-live="polite"></p>
+            <p class="settings-help">Portable backup includes ledger data and stored images.</p>
+            <label class="import-label">Import 50A Backup<input id="importInput" type="file" accept="application/json" /></label>
+            <button id="clearBtn" class="danger">Clear all local data</button>
+          </div>
+          <div class="settings-section" id="googleSyncSection">
+            <h3>Legacy Google Drive sync</h3>
+            <p id="syncStatus" class="settings-help">Google not connected · local data remains available offline.</p>
+            <label>Google OAuth web client ID
+              <input id="googleClientIdInput" type="text" inputmode="text" autocomplete="off" placeholder="1234567890-....apps.googleusercontent.com" />
+            </label>
+            <p class="settings-help">Uses Google Drive private app data. Scope: Drive appDataFolder plus basic account identity. Tokens stay in this browser session, not localStorage.</p>
+            <div class="sync-actions"><button id="connectGoogleBtn" type="button" class="accent">Connect Google</button><button id="syncNowBtn" type="button" class="ghost">Sync now</button><button id="restoreGoogleBtn" type="button" class="ghost">Restore from Google</button><button id="disconnectGoogleBtn" type="button" class="ghost">Disconnect</button></div>
+            <p id="syncLastSuccess" class="settings-help">No successful sync yet.</p>
+            <p class="settings-help">Data is stored on this device. Use Backup to protect or move your ledger. Google sync is private to your account; it does not replace manual backups.</p>
+          </div>
+        </details>
       </div>
     </section>
   </main>

@@ -1,3 +1,4 @@
+import {checkSettingsDisclosure} from '../tests/settings-disclosure.mjs';
 /* Synthetic isolated Chromium context. Never connects to an existing user profile. */
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
@@ -16,11 +17,11 @@ const origin=`http://127.0.0.1:${server.address().port}`;
 let browser;
 try{
  browser=await chromium.launch({headless:true,...(process.env.CHROME_EXECUTABLE?{executablePath:process.env.CHROME_EXECUTABLE}:{})});
- const context=await browser.newContext({serviceWorkers:'block'}); // Never user storage.
+ const context=await browser.newContext({serviceWorkers:'block',...(process.env.MOBILE_TEST?{viewport:{width:390,height:844},isMobile:true,hasTouch:true}:{})}); // Never user storage.
  await context.route('**/*',route=>route.request().url().startsWith(origin)?route.continue():route.abort());
  console.log('Browser launched');const page=await context.newPage();page.setDefaultTimeout(15000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(origin);console.log('App page loaded');await page.waitForFunction(()=>typeof BackupUtils!=='undefined'&&typeof state!=='undefined'&&!document.body.inert);
- console.log('Startup ready');
+ console.log('Startup ready');await checkSettingsDisclosure(page);
  // A fresh app's real default dataset must also be exportable.
  const fresh=await page.evaluate(async()=>{const b=await BackupUtils.create(state,attachmentGet);return (await BackupUtils.validate(b)).summary});assert.ok(fresh.transactions>0);console.log('Fresh export passed');
  const f=fixture(),b=await U.create(f.state,f.get);assert.equal(b.state.transactions[5].items[0].adjustment,'');const data=JSON.stringify(b);
@@ -36,7 +37,7 @@ try{
  await page.reload();await page.waitForFunction(()=>typeof state!=='undefined'&&!document.body.inert);
  const second=await page.evaluate(async()=>await BackupUtils.create(state,attachmentGet));assert.deepEqual(second.state,b.state);assert.deepEqual(second.manifest,b.manifest);
  // Exercise actual exported download and independent validator.
- await page.locator('[data-tab="settings"]').click();
+ await checkSettingsDisclosure(page);
  const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#exportBtn').click()]);
  const stream=await download.createReadStream(),chunks=[];for await(const c of stream)chunks.push(c);const exported=JSON.parse(Buffer.concat(chunks));assert.deepEqual(exported.manifest,b.manifest);await U.validate(exported);
  // Real IDB transaction abort before activation keeps previous localStorage intact.
