@@ -103,9 +103,9 @@ Opening any existing transaction defaults the update checkbox **off**, even if t
 
 The transaction save button explicitly says **Save payment only** or **Save payment + update estimate** for variable bills. A status beside it names the bill and shows the retained amount or the old → new estimate, so an edit cannot look like it will update an estimate when the checkbox is off.
 
-## Supabase Phase 1: foundation only
+## Supabase cloud ledger
 
-**Supabase is NOT YET the authoritative data store. Local storage remains authoritative until the migration phase is explicitly completed.** Nothing uploads on sign-in. All existing transaction/recurring/dashboard code (`app.js`, `recurring-utils.js`), IndexedDB images, local import/export and Google controls remain active and unchanged. Google Drive sync is **LEGACY / pending retirement**; do not treat it as the new multi-device architecture.
+**Local mode remains the default. Phase 2B adds explicit, owner-bound cloud activation on each device; see [activation, offline behavior and rollback](CLOUD-CUTOVER.md).** Nothing uploads on sign-in for local-mode devices. Activated devices replay their explicitly queued mutations after authentication. All existing transaction/recurring/dashboard code (`app.js`, `recurring-utils.js`), IndexedDB images, local import/export and Google controls remain active and unchanged. Google Drive sync is **LEGACY / pending retirement**; do not treat it as the new multi-device architecture.
 
 Architecture: static PWA → separate Supabase Auth/client boundary → owner-protected Postgres tables and private evidence Storage. `cloud/client.mjs` owns client/session/Auth; `cloud/data.mjs` only reads connectivity metadata; `cloud/ui.mjs` connects the small Settings panel. No application financial repository, sync, OCR or Alexa endpoint is enabled. The separately invoked [certified Phase 2A importer](MIGRATION.md) creates a verified cloud copy without changing application behavior.
 

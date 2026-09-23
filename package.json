@@ -8,13 +8,15 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "TZ=America/Chicago node --test tests/*.test.js tests/*.test.mjs tests/*.test.cjs",
-    "check": "node --check app.js && node --check recurring-utils.js && node --check sw.js && node --check cloud/ui.mjs && node --check finance-utils.js && node --check backup-utils.js && node --check backup-storage.js && node --check backup-boot.js && node --check scripts/validate-backup.mjs && node --check scripts/test-backup-browser.mjs && node --check scripts/migrate-certified-backup.mjs && node --check scripts/migration/model.mjs && node --check scripts/migration/sql.mjs && node --check scripts/test-migration-db.mjs",
+    "check": "node --check app.js && node --check recurring-utils.js && node --check sw.js && node --check cloud/ui.mjs && node --check finance-utils.js && node --check backup-utils.js && node --check backup-storage.js && node --check backup-boot.js && node --check scripts/validate-backup.mjs && node --check scripts/test-backup-browser.mjs && node --check scripts/migrate-certified-backup.mjs && node --check scripts/migration/model.mjs && node --check scripts/migration/sql.mjs && node --check scripts/test-migration-db.mjs && node --check cloud/ledger-model.mjs && node --check cloud/repository.mjs && node --check cloud/device.mjs && node --check cloud/cutover-ui.mjs",
     "test:rls": "bash scripts/test-rls.sh",
     "test:backup": "node --test tests/backup.test.cjs",
     "validate:backup": "node scripts/validate-backup.mjs",
     "test:backup:browser": "node scripts/test-backup-browser.mjs",
     "migrate:certified": "node scripts/migrate-certified-backup.mjs",
-    "test:migration": "node --test tests/migration.test.mjs && node scripts/test-migration-db.mjs"
+    "test:migration": "node --test tests/migration.test.mjs && node scripts/test-migration-db.mjs",
+    "test:cloud": "node --test tests/cutover.test.mjs && node scripts/test-cloud-db.mjs",
+    "test:cloud:browser": "node scripts/test-cloud-browser.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.0"
