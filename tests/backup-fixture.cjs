@@ -8,3 +8,11 @@ function fixture(){
   return {state,records,get:id=>records.find(r=>r.id===id)};
 }
 module.exports={fixture,png,stamp};
+// Matches the inspected real representation, with synthetic identities and no private text.
+module.exports.historicalNumericFixture=()=>{
+  const f=fixture(),t=f.state.transactions[0];
+  t.items[0]={name:'Synthetic utility service',amount:'123',adjustment:'',category:'Utilities',bucket:'utilities',status:'kept',depositStatus:'held',depositRefunded:0};
+  delete t.recurringChargeId;delete t.oneTimeAmount;
+  f.state.transactions=[f.state.transactions[1],...Array.from({length:4},(_,i)=>({id:`synthetic-zero-${i}`,date:'2026-09-01',merchant:'Synthetic only',notes:'',receipt:null,attachmentIds:[],items:[{name:'Synthetic zero',amount:'0',adjustment:'0',category:'Other',bucket:'excluded',status:'kept'}]})),t];
+  return f;
+};
