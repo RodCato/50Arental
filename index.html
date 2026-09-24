@@ -280,17 +280,17 @@
     <img id="imagePreview" alt="Expense screenshot preview" />
   </dialog>
 
-  <dialog id="conditionDialog">
+  <dialog id="conditionDialog" aria-labelledby="conditionDialogTitle">
     <form method="dialog" id="conditionForm" class="dialog-form">
-      <div class="dialog-head"><div><p class="eyebrow">PROPERTY CONDITION</p><h2>Add photo evidence</h2></div><button type="button" class="icon-btn" data-dialog-dismiss="conditionDialog" aria-label="Close">×</button></div>
+      <div class="dialog-head"><div><p class="eyebrow">PROPERTY CONDITION</p><h2 id="conditionDialogTitle">Add photo evidence</h2></div><button type="button" class="icon-btn" data-dialog-dismiss="conditionDialog" aria-label="Close">×</button></div>
       <div class="form-grid">
         <label>Snapshot<select name="phase"><option value="move-in">Move-in</option><option value="move-out">Move-out</option></select></label>
         <label>Room<input name="room" required placeholder="Kitchen, bathroom…" /></label>
         <label class="full">Photos<input name="photos" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" multiple required /></label>
         <label class="full">Notes<textarea name="notes" rows="3" placeholder="Existing scratch, clean appliance, floor condition…"></textarea></label>
       </div>
-      <label>Date<input id="conditionDate" name="date" type="date" required /></label><p id="conditionError" role="status"></p><p class="settings-help">Cloud photos require a connection.</p>
-      <div class="dialog-actions"><button type="button" class="ghost" data-dialog-dismiss="conditionDialog">Cancel</button><button type="submit" value="default" class="accent">Save photos</button></div>
+      <div id="conditionExistingPhoto" hidden></div><label>Date<input id="conditionDate" name="date" type="date" required /></label><p id="conditionError" role="status"></p><p id="conditionHelp" class="settings-help">Cloud photos require a connection.</p>
+      <div class="dialog-actions"><button type="button" class="ghost" data-dialog-dismiss="conditionDialog">Cancel</button><button id="conditionSubmit" type="submit" value="default" class="accent">Save photos</button></div>
     </form>
   </dialog>
 
