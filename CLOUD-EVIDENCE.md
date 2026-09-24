@@ -100,3 +100,23 @@ Automated browser checks verify input attributes, keyboard file-chooser activati
 5. Verify one property record with the remaining two photos. Refresh Mac and open both.
 6. Delete only the temporary record through the normal app UI. Verify its metadata/Storage cleanup and no pending photo recovery/conflicts; preserve any legitimate evidence.
 7. Smoke-test the same Take photo/Choose photos actions in a receipt transaction, including Cancel before Save.
+
+## Mobile picker cancellation fix (shell v20)
+
+The reproduced root cause was event bubbling: HTML file inputs emit a bubbling `cancel` event when the picker is dismissed. Both dialog listeners handled every descendant cancel as a dialog cancel, called close/dismiss, then their close handlers destroyed unsaved drafts. A separate Add photos card handler explicitly called the gallery input's click immediately after opening the property editor. That bypass is removed.
+
+Shared picker cancel handlers now stop propagation and reset only the relevant input. Dialog handlers additionally require the event target to be the dialog itself. Empty FileLists return without rebuilding previews or changing draft state. The redundant document-wide receipt Escape handler is removed; native topmost-dialog cancellation handles actual editor Back/Escape. Explicit editor Cancel/X, successful Save and security sign-out behavior remain intact.
+
+Focus/online cloud refresh already checks for an open dialog and is deferred while editing; it did not cause the reproduced closure. render updates galleries but does not replace the editor DOM. There are no visibilitychange/popstate/backdrop handlers resetting drafts. pagehide releases the editor lease, not the form. No new history/refresh infrastructure or arbitrary timeout is added. Normal focus refresh resumes outside the editor and stale revisions continue to conflict normally.
+
+Draft metadata remains in the mounted form; existing/removed IDs and new File objects remain in the existing in-memory draft collections. The normal picker handoff does not reset either. Full OS process termination/reload is a separate limitation: unsaved drafts are not made durable across process destruction, and no unsaved image is uploaded or persisted solely for this fix.
+
+Browser regressions reproduce bubbling input cancellation, empty FileList and no-input-event focus/visibility return for new/existing property and receipt drafts; assert no business/attachment rows, Storage objects or operation receipts change; verify Add photos never launches a picker automatically; and verify the mixed A/B → cancel camera/gallery → C → cancel camera → D/E → remove B → Save sequence yields A/C/D/E. Native editor Escape still closes the editor, and focus refresh still runs after closing it. These are isolated browser simulations, not a physical Android camera test.
+
+### Physical Android retest after deployment
+
+- **New property:** On shell v20, open Add property evidence. Enter Kitchen, notes “physical cancellation test”, and a chosen date. Choose two harmless gallery images. Tap Take photo and press Android Back/cancel. The editor, metadata and both previews must remain. Reopen Take photo, capture a third image, and confirm three previews. Explicitly Cancel the property editor; no cloud record/upload should exist.
+- **Existing temporary property:** Tap Add photos. The normal editor must show existing metadata/photos and both Take photo/Choose photos controls without opening a picker. Open and cancel Gallery, then Camera. Both returns must leave the editor/draft intact. Explicitly Cancel. Existing evidence must be unchanged.
+- **Receipt:** Open Add transaction, fill temporary merchant/line items, choose a receipt image, launch Camera and cancel. All transaction fields and its receipt preview must remain. Explicitly Cancel the transaction; no cloud transaction/upload should exist.
+
+No production business data, Supabase schema/RPC, Storage/RLS, Backup v3 or evidence lifecycle changes are part of this fix. Private responses remain uncached.
