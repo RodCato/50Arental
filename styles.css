@@ -51,3 +51,5 @@
 #conditionExistingPhoto img{max-width:100%;max-height:220px;object-fit:contain}
 #conditionForm input,#conditionForm textarea,#conditionForm select{min-width:0;max-width:100%;box-sizing:border-box}
 #conditionForm [hidden]{display:none!important}
+
+.property-photos{display:flex;flex-wrap:wrap;gap:10px}.gallery-card .property-photos img{width:76px;height:76px;object-fit:cover}.property-draft-photo{width:130px;max-width:100%;display:grid;gap:6px}.property-draft-photo button{font-size:.8rem;min-height:44px}.property-actions{display:flex;flex-wrap:wrap;gap:6px}.property-actions button{min-height:44px}#conditionForm .form-grid>*{min-width:0}

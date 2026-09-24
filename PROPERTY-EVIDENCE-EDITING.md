@@ -1,5 +1,7 @@
 # Phase 3.1 — editable property evidence
 
+Historical scope: Phase 3.2 expands the one-photo contract below. See CLOUD-EVIDENCE.md for current cardinality, photo-set editing, ordering and backup compatibility.
+
 Each Property card now has Edit. The existing dialog prefills room/area, move-in or move-out phase, evidence date, and complete multiline notes, and displays the current private photo. Save changes updates metadata; Cancel/close/Escape discard form changes. Gallery notes retain line breaks and wrap long text.
 
 Metadata saves use the existing structured DeviceLedger queue and ledger_apply RPC. The property ID, owner, created_at, attachment row/ID/path and image bytes remain unchanged. The server updates updated_at and ledger revision. There are no upload/delete calls for metadata edits. Offline metadata changes queue and replay normally. A stale ledger revision preserves the attempted edit as a conflict; the existing Cloud controls let the user review/export pending intent or use the cloud version. Existing focus/online/manual refresh reconstructs the other device; no new realtime subscription is introduced. Open dialogs suppress automatic refresh to retain the editor's base revision.

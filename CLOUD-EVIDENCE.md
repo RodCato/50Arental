@@ -1,16 +1,16 @@
-# Phase 3 cloud evidence
+# Phase 3 cloud evidence (including Phase 3.2 multi-photo properties)
 
 Cloud receipts and property-condition photos use private Supabase Storage bucket `50a-evidence`. No OCR, receipt parsing, Alexa, public URLs or automatic legacy-image migration is included.
 
 ## Existing local behavior
 
-The transaction file input accepts multiple JPEG/PNG/WebP files; receipt associations use `attachmentIds[]`. Property capture accepts multiple files and creates one room/phase/date/notes record per image. Local mode compresses with createImageBitmap/canvas to at most 1600px, never upscaling, requesting WebP quality 0.82; it historically falls back to the input on conversion failure. Binary records live in IndexedDB, with object-URL previews and separate attachment deletion. Backup v3 embeds exact referenced image bytes and verifies hashes. These local/rollback and recovery mechanisms remain available.
+The transaction file input accepts multiple JPEG/PNG/WebP files; receipt associations use `attachmentIds[]`. Property capture now creates one room/phase/date/notes record with an ordered attachmentIds array, including an empty array for metadata-only records. Existing singular attachmentId records remain readable. Local mode compresses with createImageBitmap/canvas to at most 1600px, never upscaling, requesting WebP quality 0.82; it historically falls back to the input on conversion failure. Binary records live in IndexedDB, with object-URL previews and separate attachment deletion. Backup v3 embeds exact referenced image bytes and verifies hashes. These local/rollback and recovery mechanisms remain available.
 
 ## Cloud paths and metadata
 
 New cloud photos use `{owner UUID}/receipts/{attachment UUID}.{webp|jpg|png}` or `{owner UUID}/property/{attachment UUID}.{webp|jpg|png}`. Stable IDs are suitable for a future authenticated/server OCR handoff. No OCR fields are introduced. The private 20 MiB bucket, allowed image MIME types, owner-path RLS and composite owner/parent foreign keys remain unchanged.
 
-The existing attachments table holds parent, bucket/path, actual MIME/byte size and a normalized filename (`photo.webp`, etc.). It contains no image bytes or signed URLs. Property records use the existing room, phase, date and notes columns. Each property photo has one attachment; transactions may have multiple images.
+The existing attachments table holds parent, bucket/path, actual MIME/byte size and a normalized filename (`photo.webp`, etc.). It contains no image bytes or signed URLs. Property records use the existing room, phase, date and notes columns. Each property record may have zero or many attachment rows referencing the same property_condition_id. The composite owner/parent foreign key is unchanged. attachments.property_position is a nonnegative integer, default zero for existing rows; new property images append after the maximum position in selection order. Reconstruction sorts by position then ID. Receipt ordering/semantics are unchanged.
 
 ## Save, interruption and cleanup
 
@@ -44,7 +44,7 @@ Portable v3 restore remains a local recovery operation. Import into cloud-author
 
 ## Manual production verification after merge/deploy
 
-1. Confirm both devices load shell v16, use the same cloud owner, and show zero pending structured mutations/conflicts/photo operations. Export a complete Backup v3 before testing.
+1. Confirm both devices load shell v18, use the same cloud owner, and show zero pending structured mutations/conflicts/photo operations. Export a complete Backup v3 before testing.
 2. On phone, create one clearly named temporary transaction (for example `Photo verification`, $0.01) and attach a harmless photo of a blank note. Save online. Verify no pending photo recovery remains.
 3. On Mac, Refresh cloud ledger. Open the same transaction and image. Verify the image is readable and matches the phone.
 4. On Mac, edit that temporary transaction and add a second harmless image. Refresh phone and open both images. Remove one image through Edit → remove thumbnail → Save; confirm the other remains.
@@ -55,3 +55,34 @@ Portable v3 restore remains a local recovery operation. Import into cloud-author
 9. Sign out/in and close/reopen on one device to verify private views lock and authentication persists as expected. Do not repeat email requests unnecessarily.
 
 Phase 4 OCR may be planned only after this physical phone/Mac evidence check passes; no OCR implementation is part of Phase 3.
+
+
+## Phase 3.2 create/edit and compatibility
+
+Create one property record with optional photos. Select multiple gallery files or repeatedly take/select single photos; selections accumulate in the draft, with individual Remove actions. Nothing uploads before Save. Cancel revokes draft preview URLs and abandons unuploaded files. Each record card groups its metadata and lazy authenticated thumbnails, with Add photos, Edit, and Delete record actions. The responsive editor scrolls vertically at 390px.
+
+Edit retains existing photos, adds new ones, removes selected existing ones, and changes metadata in one logical save. All new files are compressed before uploads start. For a mixed remove/add edit, old objects remain intact until the new metadata set commits atomically. If an upload or definitive finalization fails, only new objects are compensated; failed compensation remains in the existing recovery journal. An uncertain acknowledgement retries the same operation ID. Failed post-commit cleanup is explicitly pending and recoverable. A stale binary edit fails the revision check and cannot resurrect a removed photo; its draft remains open for review. Metadata-only edits use the structured offline queue and make no Storage calls. Binary changes require a connection and an empty queue. Delete record cleans every former object, including zero/one/many-photo records, after metadata commit.
+
+The additive migration 20260924000100_property_multi_photo adds only property_position and removes the RPC's exactly-one-property-photo check. It rebuilds no tables, changes no owners/paths/IDs or MIME/RLS policies, and preserves uploaded-object verification and financial validation. Deploy the migration before the v18 app; both devices must load the updated app before using multi-photo records. Old clients/validators do not understand new attachmentIds property arrays.
+
+Backup remains v3: new property records use ordered attachmentIds[], while old singular attachmentId snapshots are validated/restored without rewriting their state or hashes. Both representations cannot be specified simultaneously with a non-null singular reference. Duplicate property references and conflicting parents are rejected. All child metadata and actual image bytes are manifested against the same property ID; one missing/unreadable object fails the entire backup. Real IndexedDB restore/re-export preserves metadata, order, manifest and byte hashes. No PDF MIME types, OCR or document ingestion are added. Future reviewed document support must extend validation, preview, backup and extraction handling; extraction results must remain user-reviewed suggestions.
+
+### Phase 3.2 physical test after merge/deployment (manual only)
+
+1. On phone and Mac confirm shell v18, same owner, and no pending/conflicting/photo-recovery operation. Preserve legitimate evidence; note current counts.
+2. Phone: create **Multi Photo Test**, Move-in, notes **temporary**, and add three harmless photos (test both multi-selection and repeated camera-style additions). Save.
+3. Mac: refresh cloud ledger; verify one record, three photos, and open all three.
+4. Mac: Edit, change notes, remove photo #2, add photo #4, Save.
+5. Phone: refresh; verify one record with edited notes and expected photos #1/#3/#4.
+6. Export Backup v3 and run standalone validation. Require integrity PASS, all references/hashes passing, and all three test property images embedded as real bytes (plus any legitimate evidence).
+7. Delete only the temporary record through the app. Verify its parent, all child metadata and Storage objects are gone with no orphans. Other legitimate records/objects must remain unchanged. Confirm pending/conflicts/photo recovery are clear on both devices.
+
+Automated development tests use disposable PostgreSQL/RLS and a local binary Storage HTTP service with real SDK/browser Blob/File/FileReader/object-URL flows. They do not replace this physical installed-PWA test or run it automatically.
+
+### Contract audit and validation record
+
+Previous one-photo enforcement lived in ledger_apply's final exactly-one count check; cloud/ledger-model.mjs fromCloud (exactly one row and singular attachmentId) and toCloud (one reference); cloud/evidence.mjs (overwriting the singular reference); app.js (one parent per selected file and one gallery photo); and backup-utils.js (singular conditionFields/references). The base property/attachment schema already had one-to-many composite owner/parent foreign keys. The repository reads the full attachment collection, BackupStorage stages every manifested attachment, and the evidence deletion diff already handled arbitrary removed attachments; those mechanisms required no redesign. Shared lifecycle/recovery and cloud refresh/queue infrastructure are reused.
+
+Development results: 88 unit tests, 49 backup tests, syntax/build/diff checks, disposable RLS tests, cloud RPC database tests, expanded evidence browser tests and desktop/mobile local backup browser regressions passed. The tests include zero/one/four-photo unit cases; partial upload failure; rejected finalization; failed cleanup/recovery; receipt multi-image regression; same-parent owner isolation; metadata-only preservation; mixed edits; stale binary conflict; real multi-photo IndexedDB restore; and missing-one-of-N backup failure. A 390px editor screenshot was visually inspected.
+
+Production preflight was 0 property_condition, 0 attachments, 0 evidence Storage objects. Migration 20260924000100 was dry-run, compared to the deployed RPC, tested locally, and applied. Before/after business-data, Storage, policy and bucket fingerprints are checked; no test evidence is created in production. Physical phone/Mac validation is deliberately left to the manual procedure above after merge/deployment.
