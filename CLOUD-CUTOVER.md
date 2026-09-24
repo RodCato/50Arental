@@ -36,7 +36,7 @@ Initial activation remains deliberately gated to the certified baseline. Activat
 
 Manual Backup v3 remains available. Online export refreshes confirmed cloud data first. Pending mutations block v3 export until reconciled or explicitly archived. Offline export requires confirmation and reports the timestamp of the cached confirmed ledger. Pending/archived intent export is a separate review artifact.
 
-Google sync code remains available for local rollback, but its controls and background merge path are disabled in cloud mode. Imports, demo reload and clear-local controls are also disabled there. New receipt/property photo capture is visibly disabled until the cloud-photo phase; no new IndexedDB-only evidence is stranded. No OCR, Alexa, image migration or Google retirement is included.
+Google sync code remains available for local rollback, but its controls and background merge path are disabled in cloud mode. Imports, demo reload and clear-local controls are also disabled there. Phase 3 enables receipt/property capture through private Storage, with explicit interruption/cleanup recovery; see [cloud evidence](CLOUD-EVIDENCE.md). No new cloud photos are stored only in IndexedDB. No OCR, Alexa, image migration or Google retirement is included.
 
 The service worker caches only allowlisted same-origin shell assets (v13). Supabase/Auth URLs, cloud configuration and private RPC responses are excluded. A cache upgrade does not activate cloud mode.
 

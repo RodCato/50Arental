@@ -28,6 +28,7 @@ try{
  assert.equal(destinationState(snapshot().rows,rows,true),'already-applied');assert.throws(()=>sql(applySQL(rows,owner)),'Race/repeated direct apply must refuse inserts');reconcile(rows,snapshot().rows,owner);
  sql(rlsSQL(owner,other,rows));reconcile(rows,snapshot().rows,owner);
  sql(await readFile(join(root,'supabase/migrations/20260923000200_cloud_ledger_rpc.sql'),'utf8'));
+ sql(await readFile(join(root,'supabase/migrations/20260923000300_cloud_evidence.sql'),'utf8'));
  const rpc=(body)=>sql(`begin; set local role authenticated; select set_config('request.jwt.claim.sub','${owner}',true); ${body}; commit;`);
  const read=()=>JSON.parse(rpc('select public.ledger_read()').trim().split('\n').at(-1));
  let snap=read(); assert.equal(snap.rows.transactions.length,rows.transactions.length);

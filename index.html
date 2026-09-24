@@ -289,6 +289,7 @@
         <label class="full">Photos<input name="photos" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" multiple required /></label>
         <label class="full">Notes<textarea name="notes" rows="3" placeholder="Existing scratch, clean appliance, floor condition…"></textarea></label>
       </div>
+      <label>Date<input id="conditionDate" name="date" type="date" required /></label><p id="conditionError" role="status"></p><p class="settings-help">Cloud photos require a connection.</p>
       <div class="dialog-actions"><button type="button" class="ghost" data-dialog-dismiss="conditionDialog">Cancel</button><button type="submit" value="default" class="accent">Save photos</button></div>
     </form>
   </dialog>
