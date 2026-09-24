@@ -40,7 +40,7 @@
   const itemFields=['name','amount','category','bucket','setupClass','status','adjustment','depositStatus','depositRefunded','moveIn','prorated','estimated','recurring','giftCardOffset'];
   const settingsFields=['rent50a','joshRent','joshAdjustments','joshStayDays','joshCleaning','moveInDate','proratedRent','adminFee','depositAmount','depositStatus','depositRefunded','forgottenEssentialsBudget','waterdropPayback'];
   const billFields=['id','name','amount','category','kind','utilityType','active','createdAt','updatedAt'];
-  const conditionFields=['id','room','phase','date','notes','attachmentId'];
+  const conditionFields=['id','room','phase','date','notes','attachmentId','attachmentIds'];
   const stateFields=['portableSchemaVersion','budget','settings','transactions','condition','recurringCharges','recurringChargesVersion','datasetVersion','legacyDemoCleanupVersion','legacyDemoCleanupRemoved'];
   function portableState(input){
     const s=clone(input);delete s.syncMeta;delete s.attachmentGeneration;delete s.backupProvenance;
@@ -54,7 +54,7 @@
     const refs=new Map();let count=0;
     const add=(id,parentType,parentId,path)=>{text(id,path,true);count++;const prior=refs.get(id);if(prior&&(prior.parentType!==parentType||prior.parentId!==parentId))fail(path,'attachment has conflicting parents');refs.set(id,{id,parentType,parentId})};
     s.transactions.forEach((t,i)=>{t.attachmentIds.forEach((id,j)=>add(id,'transaction',t.id,`$.state.transactions[${i}].attachmentIds[${j}]`));const type=receiptType(t.receipt);if(type!=='none'&&type!=='embedded')fail(`$.state.transactions[${i}].receipt`,'nonportable evidence');});
-    s.condition.forEach((r,i)=>{if(r.attachmentId!=null)add(r.attachmentId,'condition',r.id,`$.state.condition[${i}].attachmentId`)});
+    s.condition.forEach((r,i)=>{const p=`$.state.condition[${i}]`;if(r.attachmentIds!==undefined){array(r.attachmentIds,p+'.attachmentIds');if(r.attachmentId!=null)fail(p,'ambiguous property attachments');if(new Set(r.attachmentIds).size!==r.attachmentIds.length)fail(p,'duplicate attachment reference');r.attachmentIds.forEach((id,j)=>add(id,'condition',r.id,`${p}.attachmentIds[${j}]`));}else if(r.attachmentId!=null)add(r.attachmentId,'condition',r.id,p+'.attachmentId')});
     return {refs,count};
   }
   function validateState(s){

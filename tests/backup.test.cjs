@@ -90,3 +90,13 @@ test('empty optional policy does not spread to required money/counts or optional
  }
  for(const [field,value] of [['oneTimeAmount',124],['depositRefunded',124]]){const f=fixture();if(field==='oneTimeAmount')f.state.transactions[0][field]=value;else f.state.transactions[0].items[0][field]=value;await assert.rejects(()=>U.create(f.state,f.get),/exceeds/)}
 });
+
+test('property v3 expands to ordered arrays without rewriting legacy single-photo snapshots',async()=>{
+ const {fixture}=require('./backup-fixture.cjs'),f=fixture();const old=await U.create(f.state,f.get);await U.validate(old);assert.equal(old.state.condition[0].attachmentId,'property');
+ const state=structuredClone(f.state);delete state.condition[0].attachmentId;state.condition[0].attachmentIds=['property','property-2','property-3'];const get=id=>id.startsWith('property-')?{...f.get('property'),id}:f.get(id);
+ const b=await U.create(state,get),v=await U.validate(b);assert.equal(v.decoded.size,4);assert.deepEqual(U.runtimeState(b,'test').condition,state.condition);assert.equal(b.version,3);
+ await assert.rejects(()=>U.create(state,id=>id==='property-2'?null:get(id)),/missing/);
+ const duplicate=structuredClone(state);duplicate.condition[0].attachmentIds.push('property');await assert.rejects(()=>U.create(duplicate,get),/duplicate attachment/);
+ const conflict=structuredClone(state);conflict.condition.push({...conflict.condition[0],id:'other'});await assert.rejects(()=>U.create(conflict,get),/conflicting parents/);
+ const ambiguous=structuredClone(state);ambiguous.condition[0].attachmentId='property';await assert.rejects(()=>U.create(ambiguous,get),/ambiguous/);
+});
