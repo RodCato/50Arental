@@ -62,9 +62,63 @@ await desktop.evaluate(()=>openNewTransaction());await desktop.locator('#transac
 await mobile.reload();await mobile.waitForFunction(()=>window.CloudLedger&&!document.body.classList.contains('cloud-locked'));await mobile.locator('[data-tab=monthly]').click();await mobile.locator('#monthInput').fill('2026-09');await mobile.locator('#monthInput').dispatchEvent('change');const thumb=mobile.locator('#monthlyTransactions img.attachment-thumb').first();await thumb.scrollIntoViewIfNeeded();await thumb.evaluate(img=>new Promise((r,j)=>{if(img.complete&&img.naturalWidth)r();else{img.onload=r;img.onerror=j}}));assert.equal(await thumb.evaluate(i=>i.naturalWidth),1600);await thumb.click();assert.equal(await mobile.locator('#imagePreviewDialog').isVisible(),true);await mobile.locator('#closeImagePreviewBtn').click();
 await mobile.locator('[data-tab=property]').click();await mobile.locator('#addConditionBtn').click();assert.equal(await mobile.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Mobile evidence has no horizontal overflow');await mobile.locator('#conditionForm [name=room]').fill('Synthetic room');await mobile.locator('#conditionForm input[type=file]').setInputFiles(upload);await mobile.locator('#conditionForm [type=submit]').click();await mobile.waitForFunction(()=>!document.getElementById('conditionDialog').open);assert.equal(snapshot().rows.property_condition.length,1);assert.equal(bytes.size,3);console.log('Property binary and metadata finalized');
 await desktop.reload();await desktop.waitForFunction(()=>window.CloudLedger&&!document.body.classList.contains('cloud-locked'));await desktop.locator('[data-tab=property]').click();const photo=desktop.locator('#moveInGallery img').first();await photo.scrollIntoViewIfNeeded();await desktop.waitForFunction(()=>document.querySelector('#moveInGallery img')?.naturalWidth===1600);
-await desktop.locator('[data-tab=settings]').click();await desktop.locator('#legacyRecoveryTools summary').click();const [download]=await Promise.all([desktop.waitForEvent('download'),desktop.locator('#exportBtn').click()]);const chunks=[];for await(const b of await download.createReadStream())chunks.push(b);const backup=JSON.parse(Buffer.concat(chunks));await Backup.validate(backup);assert.equal(backup.attachments.length,3);
+// Metadata-only editing: cancellation, offline queue, stale-editor conflict, and cross-device reconstruction.
+const originalProperty=structuredClone(snapshot().rows.property_condition[0]),originalAttachments=structuredClone(snapshot().rows.attachments),originalObjects=[...bytes].map(([k,v])=>[k,Buffer.from(v.data)]);
+const propertyId=originalProperty.id;
+await desktop.locator('[data-edit-condition-id]').click();
+assert.equal(await desktop.locator('#conditionForm [name=room]').inputValue(),'Synthetic room');
+await desktop.locator('#conditionForm [name=notes]').fill('Cancelled change');
+await desktop.locator('#conditionDialog').getByRole('button',{name:'Cancel',exact:true}).click();
+assert.deepEqual(snapshot().rows.property_condition[0],originalProperty);
+// Leave mobile with the old revision and an open editor while desktop saves.
+await mobile.locator('[data-edit-condition-id]').click();
+await desktop.locator('[data-edit-condition-id]').click();
+const editedNotes='First line\nSecond line\n'+ 'Detailed inspection notes. '.repeat(120);
+await desktop.locator('#conditionForm [name=room]').fill('Edited room');
+await desktop.locator('#conditionForm [name=phase]').selectOption('move-out');
+await desktop.locator('#conditionDate').fill('2026-08-21');
+await desktop.locator('#conditionForm [name=notes]').fill(editedNotes);
+await desktop.locator('#conditionSubmit').click();
+await desktop.waitForFunction(()=>document.querySelector('#cloudLedgerControls').textContent.includes('Cloud connected'));
+const updated=snapshot().rows.property_condition[0];
+assert.equal(updated.id,propertyId);assert.equal(updated.owner_id,originalProperty.owner_id);assert.equal(updated.created_at,originalProperty.created_at);assert.notEqual(updated.updated_at,originalProperty.updated_at);
+assert.equal(updated.room,'Edited room');assert.equal(updated.phase,'move-out');assert.equal(updated.condition_date,'2026-08-21');assert.equal(updated.notes,editedNotes);
+assert.deepEqual(snapshot().rows.attachments,originalAttachments);assert.equal(bytes.size,3);for(const [k,v]of originalObjects)assert.deepEqual(bytes.get(k).data,v);
+await mobile.locator('#conditionForm [name=notes]').fill('Stale mobile edit');await mobile.locator('#conditionSubmit').click();
+await mobile.waitForFunction(()=>document.querySelector('#cloudLedgerControls').textContent.includes('Conflicts/errors: 1'));
+assert.equal(snapshot().rows.property_condition[0].notes,editedNotes);
+await mobile.locator('[data-tab=settings]').click();await mobile.getByRole('button',{name:'Use cloud version; archive pending intent',exact:true}).click();
+await mobile.waitForFunction(()=>document.querySelector('#cloudLedgerControls').textContent.includes('Cloud connected'));
+await mobile.locator('[data-tab=property]').click();await mobile.locator('[data-edit-condition-id]').click();
+for(const [field,value]of Object.entries({room:'Edited room',phase:'move-out',notes:editedNotes,date:'2026-08-21'}))assert.equal(await mobile.locator(`#conditionForm [name=${field}]`).inputValue(),value);
+assert.equal(await mobile.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.querySelector('#conditionDialog').scrollWidth<=document.querySelector('#conditionDialog').clientWidth),true,'390px edit form fits');
+await mobile.waitForFunction(()=>document.querySelector('#conditionExistingPhoto img')?.naturalWidth===1600);
+await mobile.screenshot({path:'/tmp/50a-property-edit-mobile.png'});
+await mobile.context().setOffline(true);await mobile.locator('#conditionForm [name=notes]').fill(editedNotes+'\nOffline addition');await mobile.locator('#conditionSubmit').click();
+await mobile.waitForFunction(()=>document.querySelector('#cloudLedgerControls').textContent.includes('Pending offline changes: 1'));
+assert.equal(snapshot().rows.property_condition[0].notes,editedNotes);
+await mobile.context().setOffline(false);await mobile.locator('[data-tab=settings]').click();await mobile.getByRole('button',{name:'Refresh cloud ledger',exact:true}).click();
+await mobile.waitForFunction(()=>document.querySelector('#cloudLedgerControls').textContent.includes('Pending offline changes: 0'));
+assert.equal(snapshot().rows.property_condition[0].notes,editedNotes+'\nOffline addition');
+await desktop.locator('[data-tab=settings]').click();await desktop.getByRole('button',{name:'Refresh cloud ledger',exact:true}).click();
+await desktop.waitForFunction(notes=>window.LedgerApp.get().condition[0].notes===notes,editedNotes+'\nOffline addition');
+for(const id of [null,other]){const attempt=()=>as(id,`update public.property_condition set notes='Unauthorized' where id='${propertyId}'`);if(id)attempt();else assert.throws(attempt,e=>String(e.stderr).includes('permission denied'));assert.equal(snapshot().rows.property_condition[0].notes,editedNotes+'\nOffline addition');}
+assert.deepEqual(snapshot().rows.attachments,originalAttachments);assert.equal(bytes.size,3);
+console.log('PASS: metadata edit, multiline notes, cancel, immutable attachment bytes/IDs, timestamps, offline replay, stale revision conflict, both-device reconstruction and 390px form');
+await desktop.locator('[data-tab=settings]').click();await desktop.locator('#legacyRecoveryTools summary').click();const [download]=await Promise.all([desktop.waitForEvent('download'),desktop.locator('#exportBtn').click()]);const chunks=[];for await(const b of await download.createReadStream())chunks.push(b);const backup=JSON.parse(Buffer.concat(chunks));await Backup.validate(backup);assert.equal(backup.attachments.length,3);const restored=Backup.runtimeState(backup,'synthetic-restore');const restoredProperty=restored.condition[0];assert.equal(restoredProperty.id,propertyId);assert.equal(restoredProperty.room,'Edited room');assert.equal(restoredProperty.phase,'move-out');assert.equal(restoredProperty.date,'2026-08-21');assert.equal(restoredProperty.notes,editedNotes+'\nOffline addition');const embedded=backup.attachments.find(a=>a.parentId===propertyId);assert.equal(embedded.id,originalAttachments.find(a=>a.property_condition_id===propertyId).id);assert.equal(embedded.sha256,await Backup.sha256(bytes.get(originalAttachments.find(a=>a.property_condition_id===propertyId).storage_path).data));
+// Restore the actual edited cloud export into a disposable local ledger, including IndexedDB bytes.
+const restoreContext=await browser.newContext({serviceWorkers:'block'});
+await restoreContext.route('**/*',r=>r.request().url().startsWith(origin)?r.continue():r.abort());
+const restorePage=await restoreContext.newPage();restorePage.on('dialog',d=>d.accept());await restorePage.goto(origin);
+await restorePage.waitForFunction(()=>window.LedgerApp&&!document.body.inert);
+await restorePage.locator('[data-tab=settings]').click();await restorePage.locator('#legacyRecoveryTools summary').click();
+await restorePage.locator('#importInput').setInputFiles({name:'synthetic-edited-backup.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
+await restorePage.waitForFunction(()=>document.querySelector('#backupStatus').textContent.includes('Restore successful'));
+const roundTrip=await restorePage.evaluate(async()=>await BackupUtils.create(window.LedgerApp.get(),attachmentGet));
+await Backup.validate(roundTrip);assert.deepEqual(roundTrip.state.condition,backup.state.condition);assert.deepEqual(roundTrip.manifest,backup.manifest);await restoreContext.close();
+console.log('PASS: edited cloud backup restored into real local IndexedDB; metadata, embedded image hashes and manifest preserved');
 // Sign-out closes a private viewer and account B cannot expose owner A's cached photos.
-await desktop.locator('[data-tab=property]').click();await desktop.locator('#moveInGallery img').click();await desktop.evaluate(()=>window.testClient.auth.signOut({scope:'local'}));await desktop.waitForFunction(()=>document.body.classList.contains('cloud-locked'));assert.equal(await desktop.locator('#imagePreviewDialog').isVisible(),false);assert.equal(await desktop.locator('#imagePreview').getAttribute('src'),null);
+await desktop.locator('[data-tab=property]').click();await desktop.locator('#moveOutGallery img').click();await desktop.evaluate(()=>window.testClient.auth.signOut({scope:'local'}));await desktop.waitForFunction(()=>document.body.classList.contains('cloud-locked'));assert.equal(await desktop.locator('#imagePreviewDialog').isVisible(),false);assert.equal(await desktop.locator('#imagePreview').getAttribute('src'),null);
 await desktop.evaluate(async access_token=>{const {error}=await window.testClient.auth.setSession({access_token,refresh_token:'synthetic'});if(error)throw Error(error.message);},token(other));await desktop.waitForTimeout(100);assert.equal(await desktop.evaluate(()=>window.LedgerApp.get().condition.length),0);
 await desktop.evaluate(async access_token=>{const {error}=await window.testClient.auth.setSession({access_token,refresh_token:'synthetic'});if(error)throw Error(error.message);},token(owner));await desktop.waitForFunction(()=>!document.body.classList.contains('cloud-locked')&&document.querySelector('#cloudLedgerControls').textContent.includes('Cloud connected'));
 // Populated Storage and parent isolation under the actual SQL policies.
