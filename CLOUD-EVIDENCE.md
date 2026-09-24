@@ -86,3 +86,17 @@ Previous one-photo enforcement lived in ledger_apply's final exactly-one count c
 Development results: 88 unit tests, 49 backup tests, syntax/build/diff checks, disposable RLS tests, cloud RPC database tests, expanded evidence browser tests and desktop/mobile local backup browser regressions passed. The tests include zero/one/four-photo unit cases; partial upload failure; rejected finalization; failed cleanup/recovery; receipt multi-image regression; same-parent owner isolation; metadata-only preservation; mixed edits; stale binary conflict; real multi-photo IndexedDB restore; and missing-one-of-N backup failure. A 390px editor screenshot was visually inspected.
 
 Production preflight was 0 property_condition, 0 attachments, 0 evidence Storage objects. Migration 20260924000100 was dry-run, compared to the deployed RPC, tested locally, and applied. Before/after business-data, Storage, policy and bucket fingerprints are checked; no test evidence is created in production. Physical phone/Mac validation is deliberately left to the manual procedure above after merge/deployment.
+
+## Camera/gallery picker fix (shell v19)
+
+Both property and receipt pickers previously combined capture="environment" with multiple on one input, which forced camera capture in the installed Android PWA. Both now expose native, keyboard-accessible **Take photo** and **Choose photos** buttons. Camera uses a separate rear-camera capture input; Gallery has multiple and no capture attribute. Both retain the supported JPEG/PNG/WebP accept list and feed the same existing draft collection. Inputs reset after each selection so repeated captures append. Draft removal and Cancel remain local; existing photos are not re-uploaded. No Storage, schema, RPC, Backup v3 or evidence-lifecycle change is involved.
+
+Automated browser checks verify input attributes, keyboard file-chooser activation, camera A + gallery B/C order using distinct image hashes, zero uploads before Save/on Cancel, normal saved photo counts, edit-mode combinations, receipt shared drafts, and the 390px layout. Shell v19 delivers the new markup/JS; private responses remain uncached. Physical Android picker behavior must be checked after deployment:
+
+1. Open Add property evidence on the installed Android PWA (updated shell v19).
+2. Tap Take photo; verify rear camera opens, capture one harmless photo and confirm its preview.
+3. Tap Choose photos; verify gallery/files appears without immediately forcing the camera. Select two existing harmless images.
+4. Verify three draft thumbnails, remove one, fill temporary room/phase/date/notes, and Save.
+5. Verify one property record with the remaining two photos. Refresh Mac and open both.
+6. Delete only the temporary record through the normal app UI. Verify its metadata/Storage cleanup and no pending photo recovery/conflicts; preserve any legitimate evidence.
+7. Smoke-test the same Take photo/Choose photos actions in a receipt transaction, including Cancel before Save.

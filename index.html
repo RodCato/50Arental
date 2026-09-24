@@ -251,10 +251,16 @@
       <div class="form-grid">
         <label>Merchant<input name="merchant" required placeholder="Amazon, Walmart…" /></label>
         <label>Date<input name="date" type="date" required /></label>
-        <label class="full attachment-picker">Expense screenshots
-          <input id="screenshotInput" name="screenshots" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" multiple />
-          <small>JPG, JPEG, PNG, or WEBP. Optional; attach receipts, bills, or refund evidence.</small>
-        </label>
+        <div class="full attachment-picker" role="group" aria-label="Receipt photos">
+          <span>Expense screenshots</span>
+          <div class="evidence-picker-actions">
+            <button type="button" class="ghost" data-photo-input="receiptCameraInput" aria-controls="receiptCameraInput">Take photo</button>
+            <button type="button" class="ghost" data-photo-input="screenshotInput" aria-controls="screenshotInput">Choose photos</button>
+          </div>
+          <input id="receiptCameraInput" name="receiptCamera" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" aria-label="Take receipt photo" hidden />
+          <input id="screenshotInput" name="screenshots" type="file" accept="image/jpeg,image/png,image/webp" multiple aria-label="Choose receipt photos" hidden />
+          <small id="receiptPhotoHelp">JPG, JPEG, PNG, or WEBP. Optional; attach receipts, bills, or refund evidence.</small>
+        </div>
       </div>
       <section class="settings-section" aria-label="Monthly bill association">
         <label>Monthly bill (optional)<select id="transactionBill"><option value="">Not associated with a monthly bill</option></select></label>
@@ -286,7 +292,15 @@
       <div class="form-grid">
         <label>Snapshot<select name="phase"><option value="move-in">Move-in</option><option value="move-out">Move-out</option></select></label>
         <label>Room<input name="room" required placeholder="Kitchen, bathroom…" /></label>
-        <label class="full">Add photos (optional)<input name="photos" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" multiple /></label>
+        <div class="full attachment-picker" role="group" aria-label="Property photos">
+          <span>Photos (optional)</span>
+          <div class="evidence-picker-actions">
+            <button type="button" class="ghost" data-photo-input="propertyCameraInput" aria-controls="propertyCameraInput">Take photo</button>
+            <button type="button" class="ghost" data-photo-input="propertyGalleryInput" aria-controls="propertyGalleryInput">Choose photos</button>
+          </div>
+          <input id="propertyCameraInput" name="propertyCamera" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" aria-label="Take property photo" hidden />
+          <input id="propertyGalleryInput" name="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple aria-label="Choose property photos" hidden />
+        </div>
         <label class="full">Notes<textarea name="notes" rows="3" placeholder="Existing scratch, clean appliance, floor condition…"></textarea></label>
       </div>
       <div id="conditionExistingPhoto" class="property-photos" hidden></div><label>Date<input id="conditionDate" name="date" type="date" required /></label><p id="conditionError" role="status"></p><p id="conditionHelp" class="settings-help">Select several photos, or take/select another before saving. Photo changes require a connection; metadata can queue offline.</p>

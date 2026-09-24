@@ -22,10 +22,10 @@ export async function cutoverUI(client){
   summary.textContent=active()?`Data mode: Cloud · ${device?.status??'Locked'} · Last refresh: ${device?.data?.lastRefresh??'never'} · Pending offline changes: ${device?.data?.queue.length??0} · Conflicts/errors: ${device?.data?.queue.filter(o=>o.error).length??0}${evidence?.pending()?' · Photo operation pending':''}${lease?'':' · Another tab owns cloud editing; close it and reload.'}`:ready?`Data mode: Local · Cloud ledger ready · Transactions: ${ready.transactions} · Line items: ${ready.items} · Monthly bills: ${ready.bills} · Water events: ${ready.water} · Cloud reconciliation: PASS`:'Data mode: Local · Check cloud ledger before activation.';
   if(active()){
    for(const id of ['seedBtn','clearBtn','importInput','connectGoogleBtn','syncNowBtn','restoreGoogleBtn','disconnectGoogleBtn','googleClientIdInput','waterdropGallonsInput'])document.getElementById(id).disabled=true;
-   document.getElementById('screenshotInput').disabled=locked;document.querySelector('#conditionForm input[type=file]').disabled=locked;document.getElementById('addConditionBtn').disabled=locked;
+   document.querySelectorAll('.attachment-picker input[type=file],.attachment-picker [data-photo-input]').forEach(input=>input.disabled=locked);document.getElementById('addConditionBtn').disabled=locked;
    document.getElementById('recoveryExportBtn').hidden=true;
    document.getElementById('syncStatus').textContent='Legacy Google sync is disabled while using the Supabase cloud ledger.';
-   document.getElementById('screenshotInput').nextElementSibling.textContent='Add/take photos · uploads require a connection';
+   document.getElementById('receiptPhotoHelp').textContent='Add/take photos · uploads require a connection';
    if(locked){views.clear();app.closeEvidence?.();document.querySelectorAll('dialog[open]').forEach(d=>d.close());app.set(app.empty());}
   }
  }
