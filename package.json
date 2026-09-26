@@ -8,7 +8,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "TZ=America/Chicago node --test tests/*.test.js tests/*.test.mjs tests/*.test.cjs",
-    "check": "node --check app.js && node --check recurring-utils.js && node --check sw.js && node --check cloud/ui.mjs && node --check finance-utils.js && node --check backup-utils.js && node --check backup-storage.js && node --check backup-boot.js && node --check scripts/validate-backup.mjs && node --check scripts/test-backup-browser.mjs && node --check scripts/migrate-certified-backup.mjs && node --check scripts/migration/model.mjs && node --check scripts/migration/sql.mjs && node --check scripts/test-migration-db.mjs && node --check cloud/ledger-model.mjs && node --check cloud/repository.mjs && node --check cloud/device.mjs && node --check cloud/cutover-ui.mjs && node --check cloud/evidence.mjs && node --check cloud/evidence-view.mjs && node --check scripts/test-evidence-browser.mjs",
+    "check": "node --check app.js && node --check recurring-utils.js && node --check sw.js && node --check cloud/ui.mjs && node --check finance-utils.js && node --check backup-utils.js && node --check backup-storage.js && node --check backup-boot.js && node --check scripts/validate-backup.mjs && node --check scripts/test-backup-browser.mjs && node --check scripts/migrate-certified-backup.mjs && node --check scripts/migration/model.mjs && node --check scripts/migration/sql.mjs && node --check scripts/test-migration-db.mjs && node --check cloud/ledger-model.mjs && node --check cloud/repository.mjs && node --check cloud/device.mjs && node --check cloud/cutover-ui.mjs && node --check cloud/evidence.mjs && node --check cloud/evidence-view.mjs && node --check scripts/test-evidence-browser.mjs && node --check server/receipt-ocr.mjs && node --check server/receipt-schema.mjs && node --check api/receipt-ocr.mjs && node --check cloud/receipt-review.mjs && node --check scripts/test-receipt-browser.mjs",
     "test:rls": "bash scripts/test-rls.sh",
     "test:backup": "node --test tests/backup.test.cjs",
     "validate:backup": "node scripts/validate-backup.mjs",
@@ -18,10 +18,12 @@
     "test:cloud": "node --test tests/cutover.test.mjs && node scripts/test-cloud-db.mjs",
     "test:cloud:browser": "node scripts/test-cloud-browser.mjs",
     "test:auth:browser": "node scripts/test-auth-browser.mjs",
-    "test:evidence:browser": "node scripts/test-evidence-browser.mjs"
+    "test:evidence:browser": "node scripts/test-evidence-browser.mjs",
+    "test:receipt:browser": "node scripts/test-receipt-browser.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.117.0"
+    "@supabase/supabase-js": "2.117.0",
+    "openai": "7.23.0"
   },
   "devDependencies": {
     "esbuild": "0.28.2"
