@@ -95,10 +95,11 @@
         <article class="metric"><span>Utilities</span><strong id="selectedUtilities">$0.00</strong><small>included in housing comparison</small></article>
         <article class="metric"><span>Household / one-time</span><strong id="selectedOneTime">$0.00</strong><small>not recurring</small></article>
         <article class="metric"><span>Groceries</span><strong id="selectedGroceries">$0.00</strong><small>excluded from Josh comparison</small></article>
+        <article class="metric"><span>Sales tax</span><strong id="selectedTax">$0.00</strong><small>included in expenses, outside housing comparison</small></article>
         <article class="metric"><span>Other / excluded</span><strong id="selectedOther">$0.00</strong><small>visible, outside housing comparison</small></article>
       </div>
       <div class="monthly-comparison"><strong id="selectedComparison">50A housing cost: $0.00 · Josh: $0.00</strong><span id="selectedComparisonDifference">$0.00 under/over Josh</span><small>Groceries and other non-housing expenses are excluded from the Josh housing comparison.</small></div>
-      <div class="filter-row" role="group" aria-label="Monthly transaction filters"><button type="button" class="filter-button active" data-month-filter="all">All</button><button type="button" class="filter-button" data-month-filter="housing">Housing</button><button type="button" class="filter-button" data-month-filter="utilities">Utilities</button><button type="button" class="filter-button" data-month-filter="setup">Household/setup</button><button type="button" class="filter-button" data-month-filter="groceries">Groceries</button><button type="button" class="filter-button" data-month-filter="other">Excluded/other</button></div>
+      <div class="filter-row" role="group" aria-label="Monthly transaction filters"><button type="button" class="filter-button active" data-month-filter="all">All</button><button type="button" class="filter-button" data-month-filter="housing">Housing</button><button type="button" class="filter-button" data-month-filter="utilities">Utilities</button><button type="button" class="filter-button" data-month-filter="setup">Household/setup</button><button type="button" class="filter-button" data-month-filter="groceries">Groceries</button><button type="button" class="filter-button" data-month-filter="tax">Sales tax</button><button type="button" class="filter-button" data-month-filter="other">Excluded/other</button></div>
       <section id="categorySummary" class="category-summary" aria-live="polite">
         <div><p class="eyebrow">SELECTED-MONTH CATEGORY TOTAL</p><h3 id="categorySummaryTitle">All expenses — August 2026</h3><p id="categorySummaryScope">Selected month spending</p><small id="categoryAllTimeContext">All-time All expenses: $0.00</small></div>
         <div class="category-summary-net"><span>Net spent</span><strong id="categoryNetSpent">$0.00</strong></div>
@@ -329,20 +330,14 @@
     <div class="line-item">
       <input data-field="name" required placeholder="Item name" />
       <input data-field="amount" required type="number" min="0" step="0.01" placeholder="Price" />
-      <select data-field="category">
-        <option>Kitchen</option><option>Bathroom</option><option>Furniture</option><option>Utilities</option><option>Internet</option><option>Cleaning</option><option>Groceries</option><option>Security</option><option>Other</option>
-      </select>
-      <select data-field="bucket" aria-label="Financial bucket">
-        <option value="housing_recurring">Housing recurring</option><option value="utilities">Utilities</option><option value="housing_one_time">Housing one-time</option><option value="groceries">Groceries</option><option value="refundable_deposit">Refundable deposit</option><option value="excluded">Excluded</option>
-      </select>
-      <select data-field="setupClass" aria-label="One-time setup classification"><option value="none">Not setup</option><option value="move_in_essential">Move-In Essential</option><option value="forgotten_essential">Forgotten Essential</option><option value="post_move_improvement">Post-Move Improvement</option><option value="lease_service_setup">Lease / Service Setup</option></select>
+      <select data-field="category"></select>
+      <select data-field="bucket" aria-label="Financial bucket"></select>
+      <select data-field="setupClass" aria-label="One-time setup classification"></select>
       <select data-field="period" aria-label="Rent period"><option value="monthly">Normal period</option><option value="prorated">Prorated / one period</option></select>
       <select data-field="timing" aria-label="Charge timing"><option value="regular">Regular transaction</option><option value="move_in">Move-in charge</option></select>
       <select data-field="depositStatus" aria-label="Deposit status"><option value="held">Held</option><option value="refunded">Refunded</option><option value="partially_refunded">Partially refunded</option><option value="forfeited">Forfeited</option></select>
       <input data-field="depositRefunded" type="number" min="0" step="0.01" placeholder="Deposit returned $" />
-      <select data-field="status">
-        <option value="kept">Kept</option><option value="returned">Returned</option><option value="refunded">Refunded</option><option value="reused">Reused / owned ($0)</option><option value="cancelled">Cancelled</option><option value="avoided">Avoided / denied</option>
-      </select>
+      <select data-field="status"></select>
       <input data-field="adjustment" type="number" min="0" step="0.01" placeholder="Refund $" />
       <button type="button" class="remove-line icon-btn" aria-label="Remove">×</button>
     </div>

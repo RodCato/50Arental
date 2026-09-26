@@ -5,6 +5,7 @@ import {join,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
 import assert from 'node:assert/strict';
 import Backup from '../backup-utils.js';
+import Finance from '../finance-utils.js';
 import {fixture} from '../tests/backup-fixture.cjs';
 import {hash,mapSource,reconcile,destinationState} from './migration/model.mjs';
 import {schemaSQL,applySQL,snapshotSQL,rlsSQL} from './migration/sql.mjs';
@@ -28,6 +29,11 @@ try{
  assert.equal(destinationState(snapshot().rows,rows,true),'already-applied');assert.throws(()=>sql(applySQL(rows,owner)),'Race/repeated direct apply must refuse inserts');reconcile(rows,snapshot().rows,owner);
  sql(rlsSQL(owner,other,rows));reconcile(rows,snapshot().rows,owner);
  sql(await readFile(join(root,'supabase/migrations/20260923000200_cloud_ledger_rpc.sql'),'utf8'));
+ const taxMigration=await readFile(join(root,'supabase/migrations/20260926000100_receipt_tax_bucket.sql'),'utf8'),beforeTaxMigration=snapshot();
+ sql('begin;'+taxMigration.replace(/^begin;|^commit;/gm,'')+'rollback;');assert.deepEqual(snapshot(),beforeTaxMigration,'Dry-run leaves all existing rows unchanged');
+ sql(taxMigration);assert.deepEqual(snapshot(),beforeTaxMigration,'Tax migration preserves all rows, timestamps and Storage');
+ const bucketConstraint=sql("select pg_get_constraintdef(oid) from pg_constraint where conrelid='public.transaction_items'::regclass and conname='transaction_items_bucket_check'");assert.deepEqual([...bucketConstraint.matchAll(/'([^']+)'::text/g)].map(m=>m[1]),Finance.buckets,'SQL check agrees with shared canonical buckets');
+
  sql(await readFile(join(root,'supabase/migrations/20260923000300_cloud_evidence.sql'),'utf8'));
  sql(await readFile(join(root,'supabase/migrations/20260924000100_property_multi_photo.sql'),'utf8'));
  const rpc=(body)=>sql(`begin; set local role authenticated; select set_config('request.jwt.claim.sub','${owner}',true); ${body}; commit;`);
@@ -68,6 +74,11 @@ try{
  const newItem={...rows.transaction_items[0],id:crypto.randomUUID(),transaction_id:newTx.id,amount:1.23};
  saved=doChange({transactions:{put:[newTx],remove:[]},transaction_items:{put:[newItem],remove:[]}});assert.ok(saved.rows.transactions.some(r=>r.id===newTx.id));
  saved=doChange({transaction_items:{put:[{...newItem,amount:2.34}],remove:[]}});assert.equal(saved.rows.transaction_items.find(r=>r.id===newItem.id).amount,2.34);
+
+ const taxItem={...newItem,id:crypto.randomUUID(),position:1,description:'Sales tax',category:'Other',bucket:'tax',setup_class:'none',amount:5.30};
+ saved=doChange({transaction_items:{put:[taxItem],remove:[]}});assert.equal(saved.rows.transaction_items.find(i=>i.id===taxItem.id).bucket,'tax');
+ assert.throws(()=>doChange({transaction_items:{put:[{...taxItem,bucket:'made_up'}],remove:[]}}));
+ console.log('PASS: tax migration dry-run + apply preserves existing rows; existing atomic RPC accepts tax and still rejects unknown buckets.');
  console.log('PASS: cloud RPC atomicity, transaction/bill/settings/benchmark/water CRUD, estimate updates, fixed protection, conflicts, idempotent replay and owner/non-owner/anonymous RLS.');
 
 }finally{try{cmd('pg_ctl',['-D',join(dir,'data'),'-m','immediate','stop'])}catch{}await rm(dir,{recursive:true,force:true})}
