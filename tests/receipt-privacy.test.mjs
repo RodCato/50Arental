@@ -16,5 +16,5 @@ test('browser bundle and public config exclude server SDK/key/model config; port
 });
 test('service worker ignores receipt API, private evidence, Supabase auth and responses',async()=>{
  const listeners={};vm.runInNewContext(await readFile('sw.js','utf8'),{self:{location:{origin:'https://example.test',href:'https://example.test/sw.js'},addEventListener:(event,handler)=>listeners[event]=handler},URL});
- for(const [method,url] of [['POST','https://example.test/api/receipt-ocr'],['GET','https://example.test/api/receipt-ocr'],['GET','https://synthetic.supabase.co/storage/v1/object/private'],['GET','https://synthetic.supabase.co/auth/v1/user'],['GET','https://api.openai.com/v1/responses']])listeners.fetch({request:{method,url},respondWith:()=>assert.fail('Private request intercepted by shell cache')});
+ for(const [method,url] of [['POST','https://example.test/api/receipt-ocr-draft'],['GET','https://example.test/api/receipt-ocr-draft'],['POST','https://example.test/api/receipt-ocr'],['GET','https://example.test/api/receipt-ocr'],['GET','https://synthetic.supabase.co/storage/v1/object/private'],['GET','https://synthetic.supabase.co/auth/v1/user'],['GET','https://api.openai.com/v1/responses']])listeners.fetch({request:{method,url},respondWith:()=>assert.fail('Private request intercepted by shell cache')});
 });

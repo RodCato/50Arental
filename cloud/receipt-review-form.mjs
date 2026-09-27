@@ -1,7 +1,7 @@
 import Finance from '../finance-utils.js';
 import {createReview,reviewedTotals,transactionDraft,classifySelected} from './receipt-draft.mjs';
 // All controls edit a separate runtime draft; raw extraction remains unchanged.
-export function reviewForm(root,data,{apply,currentCount}){
+export function reviewForm(root,data,{apply,currentCount,unsaved=false}){
  const draft=createReview(data.extraction),form=document.createElement('form');form.className='receipt-review-form';root.replaceChildren(form);
  const element=(parent,tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;parent.append(e);return e;};
  const button=(parent,label,work)=>{const b=element(parent,'button',label);b.type='button';b.className='ghost';b.onclick=work;return b;};
@@ -36,8 +36,8 @@ export function reviewForm(root,data,{apply,currentCount}){
  element(details,'p','Quantity, unit price, SKU, raw text, time and receipt checkpoints are review-only. Saved amounts are line totals. Confidence is not measured.');
  for(const [key,value] of Object.entries(data.usage))element(details,'p',`${key}: ${value??'Unavailable'}`);
  const raw=element(details,'details');element(raw,'summary','Original extraction (unchanged)');element(raw,'pre',JSON.stringify(data.extraction,null,2));
- element(form,'p',`This transaction currently has ${currentCount} line item(s). Apply requires explicit replacement confirmation and does not save.`);
+ element(form,'p',`This transaction currently has ${currentCount} line item(s). Existing meaningful lines require replacement confirmation. Apply does not save.`);
  const bar=element(form,'div');bar.className='receipt-apply-bar';const error=element(bar,'p');error.setAttribute('role','alert');const submit=element(bar,'button','Apply to transaction');submit.type='submit';submit.className='accent';submit.dataset.applyReceipt='';
- form.onsubmit=event=>{event.preventDefault();error.textContent='';try{const next=transactionDraft(draft);if(reviewedTotals(draft).difference!==0&&!ack.checked)throw Error('Review and acknowledge the remaining difference or unreadable receipt total.');if(!confirm(`Replace the existing ${currentCount} draft line item(s) with ${next.items.length} reviewed line item(s), including sales tax if charged? Nothing is saved until Save transaction.`))return;apply(next);}catch(e){error.textContent=e.message;}};
+ form.onsubmit=event=>{event.preventDefault();error.textContent='';try{const next=transactionDraft(draft);if(reviewedTotals(draft).difference!==0&&!ack.checked)throw Error('Review and acknowledge the remaining difference or unreadable receipt total.');if((!unsaved||currentCount>0)&&!confirm(`Replace the existing ${currentCount} draft line item(s) with ${next.items.length} reviewed line item(s), including sales tax if charged? Nothing is saved until Save transaction.`))return;apply(next);}catch(e){error.textContent=e.message;}};
  renderItems();reconcile();return draft;
 }

@@ -1,7 +1,12 @@
 import {toCloud,diff} from './ledger-model.mjs';
 const MIME={'image/webp':'webp','image/jpeg':'jpg','image/png':'png'};
 export const LIMIT=20*1024*1024;
-export async function prepareImage(file){
+const normalizedImages=new WeakMap();
+export function prepareImage(file){
+ if(normalizedImages.has(file))return normalizedImages.get(file);
+ const task=normalizeImage(file);normalizedImages.set(file,task);task.catch(()=>normalizedImages.delete(file));return task;
+}
+async function normalizeImage(file){
  if(!file||!MIME[file.type])throw Error('Choose a JPEG, PNG, or WebP image.');
  if(!file.size||file.size>LIMIT)throw Error('Photo must be between 1 byte and 20 MiB.');
  let bitmap;
