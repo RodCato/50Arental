@@ -9,6 +9,7 @@
     { "source": "/cloud-config.json", "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
   ],
   "functions": {
-    "api/receipt-ocr.mjs": { "maxDuration": 60 }
+    "api/receipt-ocr.mjs": { "maxDuration": 60 },
+    "api/receipt-ocr-draft.mjs": { "maxDuration": 60 }
   }
 }
