@@ -1,3 +1,4 @@
+import {CURRENT_CONTRACT} from '../cloud/contract.mjs';
 // Real supabase-js and app UI; disposable profile and synthetic HTTP responses only.
 import {createServer} from 'node:http';
 import {readFile,mkdtemp,rm} from 'node:fs/promises';
@@ -24,6 +25,7 @@ if(url.pathname==='/auth/v1/user'){if(userDelay)await new Promise(r=>setTimeout(
 else if(url.pathname==='/auth/v1/token'){refreshes++;body=session();}
 else if(url.pathname==='/auth/v1/logout'){assert.equal(url.searchParams.get('scope'),'local');logouts++;return route.fulfill({status:204});}
 else if(url.pathname==='/auth/v1/otp'){emails++;body={};}
+else if(url.pathname==='/rest/v1/rpc/ledger_capabilities')body=CURRENT_CONTRACT;
 else if(url.pathname==='/rest/v1/rpc/ledger_read')body=snapshot;
 else {writes++;return route.abort();}
 return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(body)});

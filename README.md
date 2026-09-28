@@ -356,3 +356,47 @@ The migration `20260928000100_automotive_fuel.sql` adds the two tables, owner po
 6. Wait for pending changes/conflicts to reach zero, refresh/focus the Mac and confirm the same event/link. Export Backup v3 and run the current standalone validator. The next suitable fill establishes a completed interval.
 
 No real $72 event or production business record was created during development. Automated verification uses disposable synthetic users/data: unit and backup suites, local migration dry-run/apply with unchanged original rows, owner/anonymous/nonowner and cross-owner checks, atomic rollback/idempotency, mobile 390px and desktop logging/editing, offline replay, cross-device read-back, and a real local Backup v3 export/restore. Existing cloud/auth/receipt/evidence/card regression suites remain in force.
+
+
+## Cloud compatibility and migration deployment (hardening-001, shell v26)
+
+**Vercel builds/deploys the frontend and server functions. It DOES NOT apply Supabase migrations. A green Vercel deployment is not proof of backend readiness.** PR #30 included the Automotive migration, but the separately documented database deployment step was missed. The frontend therefore queued a vehicle mutation against an older RPC. The migration is now deployed; this hardening does not change real vehicles/fuel or recover device intents.
+
+### Version contract and write admission
+
+`cloud/contract.mjs` is the canonical frontend ledger API/semantic contract definition. Contract **2** covers Automotive; it is distinct from shell v26, Backup schema v3 and migration timestamps. `DOMAIN_VERSIONS` assigns minimum API versions to each mutation domain, and feature checks protect tax, multi-photo property evidence and Automotive transaction links. Unknown future domains fail closed until deliberately registered. New features must declare requirements here and in the reviewed backend capability migration.
+
+The additive `20260928000200_cloud_capabilities.sql` supplies authenticated `ledger_capabilities()` with only contract version, domain/feature names and supported read versions. No private rows or credentials are returned. It does not rewrite business records or replace the existing atomic RPC, RLS, FK or financial constraints. Anonymous execution is denied. This endpoint is explicit backend confirmation; clients do not infer support from table existence. Existing `ledger_read(client_version: 2)` remains the v2 read contract; advertised legacy read support permits existing domains when Automotive is unavailable.
+
+Authentication/startup checks capabilities before unlocking mutation admission. Settings distinguishes compatible, incompatible and unknown; unknown means the current check is unreachable, not automatically incompatible. Verified capability metadata is stored separately from business state and backups, bound to Supabase project, owner and the application contract that verified it. Earlier verified contracts may authorize only domains/features that still satisfy current per-domain requirements; an offline frontend upgrade never gains new permissions from its cache. Explicit incompatibility revokes old grants, whereas temporary network loss retains previously verified support. Sign-out locks the ledger; another account/project cannot inherit the verification.
+
+`DeviceLedger.capture` checks every domain/feature before persisting any draft or queued operation. The repository checks again before execution. Evidence admission checks before journal creation or uploads. Automotive Add/Edit/deactivate and fuel Add/Edit/delete, linking and combined financial creation therefore cannot partially enter the queue when unsupported. The same central gate protects other and future domains. Supported transaction, Waterdrop and property/evidence paths continue when only Automotive is unavailable; OCR analysis remains unchanged and read-only with respect to transaction persistence.
+
+Vehicle/fuel forms remain open with their fields, notes and transaction choice preserved when Save is blocked. **Check again** checks capabilities without saving or replaying an error-marked intent. After a schema-only expansion it refreshes the confirmed revision if business rows are unchanged, preserving the open form. Actual concurrent business edits require cancel/refresh/review; they are never silently rebased. Existing pending intent is explicitly reported and is not automatically archived or retried.
+
+Errors distinguish backend incompatibility, revision conflict, authentication, validation, server failures and offline transport. Known missing schema/RPC/domain errors show an actionable cloud-update message without SQL internals; if one occurs after admission, the operation is preserved as `BACKEND_INCOMPATIBLE` and unsafe automatic replay stops. Genuine SQLSTATE 40001 retains the existing conflict resolution flow. A previously verified device can still queue structured operations offline. This is not a new conflict-merging or rejected-intent recovery system.
+
+### Release procedure — required before dependent frontend rollout
+
+Use expand/contract: **expand database → verify → deploy dependent frontend → remove deprecated behavior only in a later, separately reviewed release**. Retain older clients' supported reads/writes during the expansion. Do not silently change the semantic meaning of an existing contract number.
+
+For any PR changing `supabase/migrations/*`:
+
+1. Review every migration and its backward compatibility. Preserve a verified backup and read-only business/Storage/security fingerprints. Check device queues/conflicts before planned migration deployment.
+2. Run `supabase db push --linked --dry-run`; inspect all pending migrations, seeds and role changes.
+3. Apply only reviewed changes with explicit deployment authorization. A preflight check never applies migrations.
+4. Verify migration history, schema/RPCs, populated isolated RLS/security tests and unchanged production business/Storage fingerprints. Do not seed production test records.
+5. Run `npm run check:migrations` and `npm run check:cloud-contract` against the intended linked project. Both must pass before dependent frontend deployment. These commands are read-only and print only migration/capability metadata. Set `SUPABASE_BIN` if the CLI is not on PATH. `CLOUD_CHECK_FIXTURE` is **synthetic test input only**; it must be unset for any hosted release check.
+6. Only then merge/deploy the frontend. Verify the production build and shell, refresh clients and perform separately approved physical tests.
+
+`check:migrations` compares every repository migration filename/version with hosted history and exits nonzero for pending files. `check:cloud-contract` also compares the explicit hosted API version/domains/features/read versions with the canonical client requirement; missing, unreachable or insufficient contracts fail the release preflight. These checks require existing operator CLI authentication, never print credentials and do not pull environment variables or apply schema.
+
+`npm run check:migration-diff -- <base-ref>` and the credential-free PR workflow surface **DATABASE MIGRATION PRESENT — production deployment required before dependent frontend rollout.** The workflow is a static warning, not a production approval or automatic deployment gate. Untrusted PR code receives no production credentials. Repository maintainers must enforce the release order; automatic production migration/deployment is intentionally not added.
+
+This branch introduces a capability migration not yet applied in production. Read-only verification confirmed current v25 `ledger_read(2)` and Automotive work. The new preflight intentionally fails until `20260928000200_cloud_capabilities.sql` is reviewed, applied and verified. **Do not merge/deploy v26 ahead of that migration.** Deploying it early would safely block unverified writes instead of stranding new intents, but is not the intended rollout.
+
+### Validation and limits
+
+Unit tests cover incompatible/unknown/compatible contracts, cached offline permissions, frontend upgrades, per-domain/feature gating, account/project isolation, exact Ram admission rejection, execution-time schema errors versus revision/auth/validation errors, schema-only revision refresh and CLI migration PASS/FAIL. `npm run test:contract:browser` verifies the 390px Ram and fuel forms retain fields/expense choice, queue nothing on incompatibility, and save exactly once after Check again plus backend upgrade. The real PostgreSQL/evidence browser suite runs transaction, Waterdrop, OCR and property evidence flows with Automotive capabilities unavailable, then enables Automotive and verifies its existing offline atomic replay. The capability migration is exercised in the disposable RLS/database suite.
+
+No compatibility/API responses are added to service-worker caching. The bundled contract module ships with shell **50a-ledger-shell-v26**. Metadata persists only as the explicit scoped offline verification, outside portable/Google backups. Offline checks cannot detect a backend downgrade that happens while disconnected; execution-time checks and existing server enforcement preserve intent safely on reconnection. An already rejected operation still needs deliberate recovery review; this task does not modify or archive it.

@@ -1,3 +1,4 @@
+import {classify,friendly} from './contract.mjs';
 import {toCloud,diff} from './ledger-model.mjs';
 const MIME={'image/webp':'webp','image/jpeg':'jpg','image/png':'png'};
 export const LIMIT=20*1024*1024;
@@ -29,8 +30,8 @@ export class Evidence {
   for(const row of j.cleanup){if(cloud.rows.attachments.some(a=>a.storage_path===row.storage_path))throw Error('Evidence still referenced; cleanup paused.');await this.check();const {error}=await this.bucket.remove([row.storage_path]);if(error)throw Error('Photo cleanup incomplete. Use Resolve photo operation in Cloud settings.');}
   this.storage.removeItem(journalKey(this.owner));return cloud;
  }
- async resolve(){await this.check();const j=this.pending();if(!j)return this.repo.loadLedger();
-  if(j.phase==='committing'){try{await this.repo.apply(j.op);j.phase='cleanup';j.cleanup=j.removed;this.persist(j);}catch(e){if(!definitive(e))throw Error('Photo completion unconfirmed. Retry Resolve photo operation online; do not repeat the save.');j.phase='cleanup';j.cleanup=j.uploads;this.persist(j);}}
+ async resolve(){await this.check();const j=this.pending();if(!j)return this.repo.loadLedger();if(j.error==='BACKEND_INCOMPATIBLE')throw Error(friendly({code:j.error})+' Pending photo intent needs recovery review; it was not retried.');
+  if(j.phase==='committing'){try{await this.repo.apply(j.op);j.phase='cleanup';j.cleanup=j.removed;this.persist(j);}catch(e){if(classify(e)==='BACKEND_INCOMPATIBLE'){j.error='BACKEND_INCOMPATIBLE';this.persist(j);throw Error(friendly(e));}if(!definitive(e))throw Error('Photo completion unconfirmed. Retry Resolve photo operation online; do not repeat the save.');j.phase='cleanup';j.cleanup=j.uploads;this.persist(j);}}
   if(j.phase==='uploading'){j.phase='cleanup';j.cleanup=j.uploads;this.persist(j);}
   return this.cleanup(j);
  }
@@ -39,11 +40,12 @@ export class Evidence {
   const next=structuredClone(state),uploads=[],blobs=[];
   for(const f of files){const blob=await this.compress(f.file),id=crypto.randomUUID(),property=f.parentType==='condition';const row={id,owner_id:this.owner,transaction_id:property?null:f.parentId,property_condition_id:property?f.parentId:null,storage_bucket:'50a-evidence',storage_path:`${this.owner}/${property?'property':'receipts'}/${id}.${MIME[blob.type]}`,original_filename:`photo.${MIME[blob.type]}`,mime_type:blob.type,size_bytes:blob.size,attachment_type:property?'property':'receipt'};uploads.push(row);blobs.push(blob);if(property){row.property_position=Math.max(-1,...snapshot.rows.attachments.filter(a=>a.property_condition_id===f.parentId).map(a=>a.property_position??0),...uploads.filter(a=>a!==row&&a.property_condition_id===f.parentId).map(a=>a.property_position??0))+1;const p=next.condition.find(p=>p.id===f.parentId);p.attachmentIds??=p.attachmentId?[p.attachmentId]:[];delete p.attachmentId;p.attachmentIds.push(id);}else next.transactions.find(t=>t.id===f.parentId).attachmentIds.push(id);}
   const mapped=toCloud(next,this.owner,{...snapshot.rows,attachments:[...snapshot.rows.attachments,...uploads]}),changes=diff(snapshot.rows,mapped),removed=snapshot.rows.attachments.filter(a=>!mapped.attachments.some(b=>b.id===a.id));
+  if(!this.repo.assertCompatible)throw Error('Cloud compatibility not verified. Connect and check again.');this.repo.assertCompatible(changes);
   const j={phase:'uploading',op:{id:crypto.randomUUID(),revision:snapshot.revision,changes},uploads,removed,cleanup:[]};this.persist(j);
   try{for(let i=0;i<uploads.length;i++){await this.check();const row=uploads[i],{error}=await this.bucket.upload(row.storage_path,blobs[i],{contentType:row.mime_type,cacheControl:'0',upsert:false});if(error)throw Error('Photo upload failed.');const check=await this.get(row);if(await digest(check.blob)!==await digest(blobs[i]))throw Error('Uploaded photo verification failed.');}}
   catch{j.phase='cleanup';j.cleanup=uploads;this.persist(j);await this.cleanup(j);throw Error('Photo upload failed; new objects cleaned up. Previous evidence is unchanged.');}
   await this.check();j.phase='committing';this.persist(j);
-  try{await this.repo.apply(j.op);}catch(e){if(definitive(e)){j.phase='cleanup';j.cleanup=uploads;this.persist(j);await this.cleanup(j);throw Error(e.code==='40001'?'Cloud conflict: this ledger changed on another device. New uploads were cleaned up; your draft is retained. Cancel, refresh, and review before retrying.':'Photo save rejected; uploaded objects cleaned up. Refresh and retry.');}throw Error('Photo completion unconfirmed. Use Resolve photo operation before saving again.');}
+  try{await this.repo.apply(j.op);}catch(e){if(classify(e)==='BACKEND_INCOMPATIBLE'){j.error='BACKEND_INCOMPATIBLE';this.persist(j);throw Error(friendly(e));}if(definitive(e)){j.phase='cleanup';j.cleanup=uploads;this.persist(j);await this.cleanup(j);throw Error(e.code==='40001'?'Cloud conflict: this ledger changed on another device. New uploads were cleaned up; your draft is retained. Cancel, refresh, and review before retrying.':'Photo save rejected; uploaded objects cleaned up. Refresh and retry.');}throw Error('Photo completion unconfirmed. Use Resolve photo operation before saving again.');}
   j.phase='cleanup';j.cleanup=removed;this.persist(j);
   try{return {snapshot:await this.cleanup(j),warning:null};}catch{return {snapshot:await this.repo.loadLedger(),warning:'Saved, but photo cleanup remains pending. Use Resolve photo operation in Cloud settings.'};}
  }
