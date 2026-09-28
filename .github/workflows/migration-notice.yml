@@ -1,0 +1,21 @@
+name: Migration deployment notice
+on: [pull_request]
+permissions:
+  contents: read
+jobs:
+  migration-notice:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Identify migrations (no production credentials)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          files=$(git diff --name-only "$BASE_SHA" HEAD -- supabase/migrations/)
+          if [ -n "$files" ]; then
+            echo "::warning::DATABASE MIGRATION PRESENT — production deployment required before dependent frontend rollout."
+            echo "DATABASE MIGRATION PRESENT — production deployment required before dependent frontend rollout." >> "$GITHUB_STEP_SUMMARY"
+            echo "$files" >> "$GITHUB_STEP_SUMMARY"
+          fi
