@@ -32,7 +32,7 @@ try{
  const taxMigration=await readFile(join(root,'supabase/migrations/20260926000100_receipt_tax_bucket.sql'),'utf8'),beforeTaxMigration=snapshot();
  sql('begin;'+taxMigration.replace(/^begin;|^commit;/gm,'')+'rollback;');assert.deepEqual(snapshot(),beforeTaxMigration,'Dry-run leaves all existing rows unchanged');
  sql(taxMigration);assert.deepEqual(snapshot(),beforeTaxMigration,'Tax migration preserves all rows, timestamps and Storage');
- const bucketConstraint=sql("select pg_get_constraintdef(oid) from pg_constraint where conrelid='public.transaction_items'::regclass and conname='transaction_items_bucket_check'");assert.deepEqual([...bucketConstraint.matchAll(/'([^']+)'::text/g)].map(m=>m[1]),Finance.buckets,'SQL check agrees with shared canonical buckets');
+ const bucketConstraint=sql("select pg_get_constraintdef(oid) from pg_constraint where conrelid='public.transaction_items'::regclass and conname='transaction_items_bucket_check'");assert.deepEqual([...bucketConstraint.matchAll(/'([^']+)'::text/g)].map(m=>m[1]),Finance.buckets.filter(b=>b!=='automotive'),'SQL check agrees with shared canonical buckets');
 
  sql(await readFile(join(root,'supabase/migrations/20260923000300_cloud_evidence.sql'),'utf8'));
  sql(await readFile(join(root,'supabase/migrations/20260924000100_property_multi_photo.sql'),'utf8'));

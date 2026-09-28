@@ -1,6 +1,7 @@
 /* Pure portable format. No DOM, network, application startup or storage access. */
 (function(root){
   const Finance=typeof module!=='undefined'&&module.exports?require('./finance-utils.js'):root.FinanceUtils;
+  const Automotive=typeof module!=='undefined'&&module.exports?require('./automotive-utils.js'):root.AutomotiveUtils;
   const FORMAT='50a-ledger-backup',VERSION=3,MAX_BYTES=128*1024*1024,MAX_IMAGE=20*1024*1024;
   // JSON would silently turn NaN/Infinity into null, which is a legacy zero only in specific fields.
   const clone=value=>JSON.parse(JSON.stringify(value,(_key,v)=>{if(typeof v==='number'&&!Number.isFinite(v))fail('$','nonfinite number');return v}));
@@ -41,7 +42,7 @@
   const settingsFields=['rent50a','joshRent','joshAdjustments','joshStayDays','joshCleaning','moveInDate','proratedRent','adminFee','depositAmount','depositStatus','depositRefunded','forgottenEssentialsBudget','waterdropPayback'];
   const billFields=['id','name','amount','category','kind','utilityType','active','createdAt','updatedAt'];
   const conditionFields=['id','room','phase','date','notes','attachmentId','attachmentIds'];
-  const stateFields=['portableSchemaVersion','budget','settings','transactions','condition','recurringCharges','recurringChargesVersion','datasetVersion','legacyDemoCleanupVersion','legacyDemoCleanupRemoved'];
+  const stateFields=['vehicles','fuelEvents','portableSchemaVersion','budget','settings','transactions','condition','recurringCharges','recurringChargesVersion','datasetVersion','legacyDemoCleanupVersion','legacyDemoCleanupRemoved'];
   function portableState(input){
     const s=clone(input);delete s.syncMeta;delete s.attachmentGeneration;delete s.backupProvenance;
     if(s.settings)delete s.settings.googleSync;
@@ -84,6 +85,10 @@
       if(t.recurringChargeId!=null){if(!billIds.has(t.recurringChargeId))fail(p+'.recurringChargeId','dangling reference');const oneTime=optionalZero(t.oneTimeAmount,p+'.oneTimeAmount');const actual=t.items.reduce((sum,it)=>sum+(['avoided','cancelled','reused'].includes(it.status)?0:Math.round(Number(it.amount)*100)-Math.round(optionalZero(it.adjustment,p+'.items.adjustment')*100)),0)/100;if(oneTime>actual)fail(p+'.oneTimeAmount','exceeds payment')}else if(t.oneTimeAmount!==undefined){if(optionalZero(t.oneTimeAmount,p+'.oneTimeAmount')!==0)fail(p+'.oneTimeAmount','requires associated bill');}
     });
     const conditions=array(s.condition,'$.state.condition');ids(conditions,'$.state.condition');conditions.forEach((r,i)=>{const p=`$.state.condition[${i}]`;keys(r,conditionFields,p);text(r.room,p+'.room');text(r.notes,p+'.notes');enumeration(r.phase,['move-in','move-out'],p+'.phase');date(r.date,p+'.date')});
+    for(const [collection,fields] of [['vehicles',['id','ownerId','nickname','year','make','model','active','createdAt','updatedAt']],['fuelEvents',['id','ownerId','vehicleId','fillDate','totalCost','gallons','pricePerGallon','odometer','fullTank','station','notes','transactionId','createdAt','updatedAt']]]){
+      if(s[collection]!==undefined){array(s[collection],'$.state.'+collection).forEach((r,i)=>{const path=`$.state.${collection}[${i}]`;keys(r,fields,path);if(r.ownerId!==undefined&&r.ownerId!==null)text(r.ownerId,path+'.ownerId',true);instant(r.createdAt,path+'.createdAt');instant(r.updatedAt,path+'.updatedAt');});}
+    }
+    Automotive.validate(s);
     return references(s);
   }
   function decode(data,path){
@@ -99,7 +104,7 @@
   }
   function dataURL(bytes,mime){let raw='';for(let i=0;i<bytes.length;i+=8192)raw+=String.fromCharCode(...bytes.slice(i,i+8192));return `data:${mime};base64,${btoa(raw)}`}
   const header=b=>({format:b.format,version:b.version,exportedAt:b.exportedAt,application:b.application,provenance:b.provenance,manifest:b.manifest,stateSha256:b.integrity.stateSha256});
-  function summary(b,refInfo){const s=b.state;return {transactions:s.transactions.length,lineItems:s.transactions.reduce((n,t)=>n+t.items.length,0),recurringBills:s.recurringCharges.length,activeBills:s.recurringCharges.filter(b=>b.active).length,inactiveBills:s.recurringCharges.filter(b=>!b.active).length,propertyRecords:s.condition.length,waterEvents:s.settings.waterdropPayback.waterdropCompletions.length,attachmentReferences:refInfo.count,uniqueAttachmentReferences:refInfo.refs.size,embeddedAttachments:b.attachments.length,inlineEvidence:s.transactions.filter(t=>receiptType(t.receipt)==='embedded').length,missingAttachments:0,duplicateIds:0,danglingRecurringReferences:0,danglingAttachmentReferences:0,actualExpenses:Finance.expenses(s.transactions.flatMap(t=>t.items)).expenses,months:Object.fromEntries([...new Set(s.transactions.map(t=>t.date.slice(0,7)))].sort().map(m=>[m,Finance.expenses(s.transactions.filter(t=>t.date.startsWith(m)).flatMap(t=>t.items))])),...Finance.benchmark(s.settings,s.recurringCharges)}}
+  function summary(b,refInfo){const s=b.state;return {vehicles:(s.vehicles||[]).length,fuelEvents:(s.fuelEvents||[]).length,transactions:s.transactions.length,lineItems:s.transactions.reduce((n,t)=>n+t.items.length,0),recurringBills:s.recurringCharges.length,activeBills:s.recurringCharges.filter(b=>b.active).length,inactiveBills:s.recurringCharges.filter(b=>!b.active).length,propertyRecords:s.condition.length,waterEvents:s.settings.waterdropPayback.waterdropCompletions.length,attachmentReferences:refInfo.count,uniqueAttachmentReferences:refInfo.refs.size,embeddedAttachments:b.attachments.length,inlineEvidence:s.transactions.filter(t=>receiptType(t.receipt)==='embedded').length,missingAttachments:0,duplicateIds:0,danglingRecurringReferences:0,danglingAttachmentReferences:0,actualExpenses:Finance.expenses(s.transactions.flatMap(t=>t.items)).expenses,months:Object.fromEntries([...new Set(s.transactions.map(t=>t.date.slice(0,7)))].sort().map(m=>[m,Finance.expenses(s.transactions.filter(t=>t.date.startsWith(m)).flatMap(t=>t.items))])),...Finance.benchmark(s.settings,s.recurringCharges)}}
   async function validate(b){
     safeTree(b);if(new TextEncoder().encode(JSON.stringify(b)).byteLength>MAX_BYTES)fail('$','file exceeds 128 MiB limit');keys(b,['format','version','exportedAt','application','provenance','state','attachments','manifest','integrity'],'$');
     if(b.format!==FORMAT)fail('$.format','unsupported format');if(b.version!==VERSION)fail('$.version','unsupported version (legacy v2 requires explicit conversion)');instant(b.exportedAt,'$.exportedAt');

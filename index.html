@@ -79,6 +79,7 @@
       <button class="tab" data-tab="monthly">Monthly</button>
       <button class="tab" data-tab="recurring">Monthly bills</button>
       <button class="tab" data-tab="setup">Setup</button>
+      <button class="tab" data-tab="automotive">Automotive</button>
       <button class="tab" data-tab="property">Property</button>
       <button class="tab" data-tab="settings">Settings</button>
     </nav>
@@ -95,11 +96,12 @@
         <article class="metric"><span>Utilities</span><strong id="selectedUtilities">$0.00</strong><small>included in housing comparison</small></article>
         <article class="metric"><span>Household / one-time</span><strong id="selectedOneTime">$0.00</strong><small>not recurring</small></article>
         <article class="metric"><span>Groceries</span><strong id="selectedGroceries">$0.00</strong><small>excluded from Josh comparison</small></article>
+        <article class="metric"><span>Automotive</span><strong id="selectedAutomotive">$0.00</strong><small>linked and manual expenses, outside housing comparison</small></article>
         <article class="metric"><span>Sales tax</span><strong id="selectedTax">$0.00</strong><small>included in expenses, outside housing comparison</small></article>
         <article class="metric"><span>Other / excluded</span><strong id="selectedOther">$0.00</strong><small>visible, outside housing comparison</small></article>
       </div>
       <div class="monthly-comparison"><strong id="selectedComparison">50A housing cost: $0.00 · Josh: $0.00</strong><span id="selectedComparisonDifference">$0.00 under/over Josh</span><small>Groceries and other non-housing expenses are excluded from the Josh housing comparison.</small></div>
-      <div class="filter-row" role="group" aria-label="Monthly transaction filters"><button type="button" class="filter-button active" data-month-filter="all">All</button><button type="button" class="filter-button" data-month-filter="housing">Housing</button><button type="button" class="filter-button" data-month-filter="utilities">Utilities</button><button type="button" class="filter-button" data-month-filter="setup">Household/setup</button><button type="button" class="filter-button" data-month-filter="groceries">Groceries</button><button type="button" class="filter-button" data-month-filter="tax">Sales tax</button><button type="button" class="filter-button" data-month-filter="other">Excluded/other</button></div>
+      <div class="filter-row" role="group" aria-label="Monthly transaction filters"><button type="button" class="filter-button active" data-month-filter="all">All</button><button type="button" class="filter-button" data-month-filter="housing">Housing</button><button type="button" class="filter-button" data-month-filter="utilities">Utilities</button><button type="button" class="filter-button" data-month-filter="setup">Household/setup</button><button type="button" class="filter-button" data-month-filter="groceries">Groceries</button><button type="button" class="filter-button" data-month-filter="automotive">Automotive</button><button type="button" class="filter-button" data-month-filter="tax">Sales tax</button><button type="button" class="filter-button" data-month-filter="other">Excluded/other</button></div>
       <section id="categorySummary" class="category-summary" aria-live="polite">
         <div><p class="eyebrow">SELECTED-MONTH CATEGORY TOTAL</p><h3 id="categorySummaryTitle">All expenses — August 2026</h3><p id="categorySummaryScope">Selected month spending</p><small id="categoryAllTimeContext">All-time All expenses: $0.00</small></div>
         <div class="category-summary-net"><span>Net spent</span><strong id="categoryNetSpent">$0.00</strong></div>
@@ -132,7 +134,12 @@
       <div id="setupTransactions" class="cards empty-state">No setup transactions yet.</div>
     </section>
 
-    <section id="property" class="tab-panel">
+    <section id="automotive" class="tab-panel" aria-label="Automotive fuel tracking">
+        <div class="toolbar"><div><h2>Automotive</h2><p>Fuel history · one purchase, one expense</p></div><button type="button" class="accent" id="logFuelBtn">Log fill-up</button></div>
+        <div class="auto-controls"><label>Vehicle<select id="autoVehicle"></select></label><label>Spending month<input id="autoMonth" type="month"></label><button type="button" class="ghost" id="addVehicleBtn">Add vehicle</button><button type="button" class="ghost" id="editVehicleBtn">Edit vehicle</button></div>
+        <p id="autoStatus" role="status"></p><div id="autoMetrics" class="auto-metrics"></div><p id="autoPace"></p><details><summary>How fuel metrics work</summary><p>Days between fuel events include partial fills. Current tank age is shown only after a full fill. MPG and cost/mile require consecutive full fills on distinct dates, both odometers, and the later fill’s gallons. Partial fills interrupt MPG; no tank-capacity assumptions. Cost/day is the earlier purchase divided by days until the next event, not a measured fuel-consumption rate.</p></details><h3>Recent fill-ups</h3><div id="fuelHistory" class="cards"></div>
+      </section>
+      <section id="property" class="tab-panel">
       <div class="toolbar">
         <div>
           <h2>Property condition</h2>
@@ -349,9 +356,11 @@
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
   <script src="recurring-utils.js"></script>
   <script src="finance-utils.js"></script>
+  <script src="automotive-utils.js"></script>
   <script src="backup-utils.js"></script>
   <script src="backup-storage.js"></script>
   <script src="backup-boot.js"></script>
+  <script defer src="automotive-ui.js"></script>
   <script defer src="cloud-foundation.js"></script>
 </body>
 </html>

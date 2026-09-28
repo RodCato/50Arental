@@ -8,8 +8,8 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "TZ=America/Chicago node --test tests/*.test.js tests/*.test.mjs tests/*.test.cjs",
-    "check": "node --check app.js && node --check recurring-utils.js && node --check sw.js && node --check cloud/ui.mjs && node --check finance-utils.js && node --check backup-utils.js && node --check backup-storage.js && node --check backup-boot.js && node --check scripts/validate-backup.mjs && node --check scripts/test-backup-browser.mjs && node --check scripts/migrate-certified-backup.mjs && node --check scripts/migration/model.mjs && node --check scripts/migration/sql.mjs && node --check scripts/test-migration-db.mjs && node --check cloud/ledger-model.mjs && node --check cloud/repository.mjs && node --check cloud/device.mjs && node --check cloud/cutover-ui.mjs && node --check cloud/evidence.mjs && node --check cloud/evidence-view.mjs && node --check scripts/test-evidence-browser.mjs && node --check server/receipt-ocr.mjs && node --check server/receipt-schema.mjs && node --check api/receipt-ocr.mjs && node --check cloud/receipt-review.mjs && node --check scripts/test-receipt-browser.mjs && node --check cloud/receipt-draft.mjs && node --check cloud/receipt-review-form.mjs && node --check server/receipt-analysis.mjs && node --check server/receipt-http.mjs && node --check server/receipt-ocr-draft.mjs && node --check api/receipt-ocr-draft.mjs && node --check scripts/test-cards-browser.mjs",
-    "test:rls": "bash scripts/test-rls.sh",
+    "check": "node --check app.js && node --check recurring-utils.js && node --check sw.js && node --check cloud/ui.mjs && node --check finance-utils.js && node --check backup-utils.js && node --check backup-storage.js && node --check backup-boot.js && node --check scripts/validate-backup.mjs && node --check scripts/test-backup-browser.mjs && node --check scripts/migrate-certified-backup.mjs && node --check scripts/migration/model.mjs && node --check scripts/migration/sql.mjs && node --check scripts/test-migration-db.mjs && node --check cloud/ledger-model.mjs && node --check cloud/repository.mjs && node --check cloud/device.mjs && node --check cloud/cutover-ui.mjs && node --check cloud/evidence.mjs && node --check cloud/evidence-view.mjs && node --check scripts/test-evidence-browser.mjs && node --check server/receipt-ocr.mjs && node --check server/receipt-schema.mjs && node --check api/receipt-ocr.mjs && node --check cloud/receipt-review.mjs && node --check scripts/test-receipt-browser.mjs && node --check cloud/receipt-draft.mjs && node --check cloud/receipt-review-form.mjs && node --check server/receipt-analysis.mjs && node --check server/receipt-http.mjs && node --check server/receipt-ocr-draft.mjs && node --check api/receipt-ocr-draft.mjs && node --check scripts/test-cards-browser.mjs && node --check automotive-utils.js && node --check automotive-ui.js && node --check scripts/test-automotive-db.mjs",
+    "test:rls": "bash scripts/test-rls.sh && node scripts/test-automotive-db.mjs",
     "test:backup": "node --test tests/backup.test.cjs",
     "validate:backup": "node scripts/validate-backup.mjs",
     "test:backup:browser": "node scripts/test-backup-browser.mjs",
@@ -20,7 +20,8 @@
     "test:auth:browser": "node scripts/test-auth-browser.mjs",
     "test:evidence:browser": "node scripts/test-evidence-browser.mjs",
     "test:receipt:browser": "node scripts/test-receipt-browser.mjs",
-    "test:cards:browser": "node scripts/test-cards-browser.mjs"
+    "test:cards:browser": "node scripts/test-cards-browser.mjs",
+    "test:automotive:db": "node scripts/test-automotive-db.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.0",
