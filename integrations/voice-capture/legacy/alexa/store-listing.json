@@ -1,0 +1,10 @@
+{
+  "publicName": "50-A",
+  "summary": "Capture a gallon by voice in your connected Google Sheet.",
+  "description": "50-A voice capture is a private proof of concept for recording water gallons in a configured Google Sheet. Say \"Alexa, open apartment ledger,\" then say \"add a gallon.\" You can also ask for help or say stop. Google Sheets setup is required. Entries are not yet synced into the 50-A app.",
+  "examplePhrases": [
+    "Alexa, open apartment ledger",
+    "Alexa, tell apartment ledger to add a gallon",
+    "Alexa, ask apartment ledger for help"
+  ]
+}

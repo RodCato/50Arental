@@ -1,0 +1,15 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "apartment ledger",
+      "intents": [
+        {"name": "AddGallonIntent", "slots": [], "samples": ["add a gallon", "add one gallon", "add another gallon", "log a gallon", "log one gallon", "I used another gallon"]},
+        {"name": "AMAZON.HelpIntent", "samples": []},
+        {"name": "AMAZON.CancelIntent", "samples": []},
+        {"name": "AMAZON.StopIntent", "samples": []},
+        {"name": "AMAZON.FallbackIntent", "samples": []}
+      ],
+      "types": []
+    }
+  }
+}

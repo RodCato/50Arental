@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "50-A capture event",
+  "description": "Generic Sheet row contract. The milestone-one endpoint accepts only water/add/1/gallon/alexa with blank merchant and category and synced=false. Future modules require explicit handler validation changes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "timestamp", "module", "action", "value", "unit", "merchant", "category", "source", "synced"],
+  "properties": {
+    "event_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9:._-]{0,199}$", "description": "Immutable globally unique event identifier; Alexa uses alexa: plus its requestId."},
+    "timestamp": {"type": "string", "format": "date-time", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$", "description": "Event occurrence in canonical UTC ISO 8601, stored as text."},
+    "module": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "action": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "value": {"type": "number"},
+    "unit": {"type": "string", "minLength": 1, "maxLength": 32},
+    "merchant": {"type": "string", "maxLength": 200},
+    "category": {"type": "string", "maxLength": 100},
+    "source": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "synced": {"type": "boolean", "description": "False until a future importer durably applies the event. Not a multi-device acknowledgement protocol."}
+  }
+}
