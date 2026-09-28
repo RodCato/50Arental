@@ -1,0 +1,10 @@
+{
+  "publicName": "50-A",
+  "summary": "Record one Waterdrop gallon in your private 50A ledger.",
+  "description": "Private gallon capture for the configured 50A ledger. Say \"Alexa, tell apartment ledger to add a gallon.\" Requires the owner-configured 50A integration.",
+  "examplePhrases": [
+    "Alexa, open apartment ledger",
+    "Alexa, tell apartment ledger to add a gallon",
+    "Alexa, ask apartment ledger for help"
+  ]
+}
