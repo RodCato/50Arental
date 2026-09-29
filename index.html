@@ -23,6 +23,7 @@
 
   <main class="shell">
     <section id="overview" class="tab-panel active">
+    <section id="housingCoverageCard" class="benchmark-card" aria-label="Housing Coverage"></section>
     <section id="overviewMetrics" class="hero-grid">
       <article class="metric primary">
         <span>Total expenses this month</span>
@@ -79,11 +80,13 @@
       <button class="tab" data-tab="monthly">Monthly</button>
       <button class="tab" data-tab="recurring">Monthly bills</button>
       <button class="tab" data-tab="setup">Setup</button>
+      <button class="tab" data-tab="income">Income</button>
       <button class="tab" data-tab="automotive">Automotive</button>
       <button class="tab" data-tab="property">Property</button>
       <button class="tab" data-tab="settings">Settings</button>
     </nav>
 
+    <section id="income" class="tab-panel"><div id="housingIncome"></div></section>
     <section id="monthly" class="tab-panel">
       <div class="toolbar month-toolbar">
         <div><p class="eyebrow">MONTHLY LEDGER</p><h2>Monthly expenses</h2><p>Review actual spending by calendar month.</p></div>
@@ -322,6 +325,7 @@
     <form id="billForm" class="dialog-form">
       <h2 id="billDialogTitle">Add monthly bill</h2>
       <p class="settings-help">Normal monthly housing cost, excluding one-time fees. Variable amounts are estimates.</p>
+      <div id="billCoverageFields"><label>Effective month<input name="effectiveMonth" type="month" required></label><label><input name="included" type="checkbox"> Counts toward Housing Coverage</label><p class="meta">Applies from this month until the next revision. Choosing an existing month corrects that revision. Earlier months stay unchanged. Scheduled changes take effect in their selected month.</p></div>
       <div class="form-grid">
         <label>Name<input name="name" required maxlength="120" /></label>
         <label>Monthly amount ($)<input name="amount" required type="number" min="0" step="0.01" /></label>
@@ -354,12 +358,14 @@
   <script src="date-utils.js"></script>
   <script src="waterdrop-utils.js"></script>
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
+  <script src="housing-utils.js"></script>
   <script src="recurring-utils.js"></script>
   <script src="finance-utils.js"></script>
   <script src="automotive-utils.js"></script>
   <script src="backup-utils.js"></script>
   <script src="backup-storage.js"></script>
   <script src="backup-boot.js"></script>
+  <script defer src="housing-ui.js"></script>
   <script defer src="automotive-ui.js"></script>
   <script defer src="cloud-foundation.js"></script>
 </body>

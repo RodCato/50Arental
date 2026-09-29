@@ -51,6 +51,15 @@ try{
  await page.locator('#importInput').setInputFiles({name:'synthetic-v2.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(v2))});
  await page.waitForFunction(()=>document.querySelector('#backupStatus')?.textContent.includes('Restore successful'));
  const legacyRestored=await page.evaluate(async()=>await BackupUtils.create(state,attachmentGet));assert.deepEqual(legacyRestored.state,b.state);assert.equal(legacyRestored.provenance.sourceVersion,2);
+ // Real staged restore also preserves all Housing source collections and history.
+ const H=require('../housing-utils.js');let housing=H.baseline(f.state,'2026-09',f.state.recurringCharges.map(b=>({...b,included:true})));
+ housing=H.put(housing,'income_sources',{id:'portable-source',name:'Synthetic source',source_type:'employment',active:true,hourly_rate_cents:1600,typical_shift_hundredths:null});
+ housing=H.put(housing,'work_sessions',{id:'portable-shift',income_source_id:'portable-source',work_date:'2026-09-01',hours_hundredths:800,hourly_rate_cents:1600,notes:''});
+ housing=H.put(housing,'coverage_settings',{...H.data(housing).coverage_settings[0],income_source_id:'portable-source'});
+ const hb=await U.create(housing,f.get);await page.locator('#importInput').setInputFiles({name:'synthetic-housing-v3.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(hb))});
+ await page.waitForFunction(()=>state.housingFinance?.income_sources?.length===1&&!document.body.inert);
+ await page.reload();await page.waitForFunction(()=>state.housingFinance?.income_sources?.length===1&&!document.body.inert);
+ const restoredHousing=await page.evaluate(async()=>({backup:await BackupUtils.create(state,attachmentGet),history:HousingUtils.history(state,'2026-10')}));assert.deepEqual(restoredHousing.backup.state,hb.state);assert.equal(restoredHousing.backup.integrity.stateSha256,hb.integrity.stateSha256);assert.deepEqual(restoredHousing.history,H.history(housing,'2026-10'));console.log('PASS: populated Housing Backup v3 UI restore, real IDB/reload/re-export, identical state hash and reconstructed history');
  // Fail actual application render on the next activated-generation startup.
  const beforeRenderFailure=await page.evaluate(()=>localStorage.getItem('fiftyA-ledger-v1'));
  await page.evaluate(async()=>{const b=await BackupUtils.create(state,attachmentGet);await BackupStorage.stage(b,state,attachmentGet)});

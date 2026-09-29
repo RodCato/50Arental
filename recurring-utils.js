@@ -1,5 +1,6 @@
 /* Monthly obligations stay independent; payment saves may explicitly update an estimate. */
 (function(root){
+  const Housing=typeof module!=='undefined'&&module.exports?require('./housing-utils.js'):root.HousingUtils;
   const VERSION=1;
   const active=records=>(records||[]).filter(record=>record.active!==false);
   const total=records=>active(records).reduce((cents,record)=>cents+Math.round(Number(record.amount)*100),0)/100;
@@ -60,7 +61,7 @@
   // Explicit save-time side effect. Historical records never continuously drive estimates.
   function saveTransaction(saved,transaction,{updateMonthlyEstimate=false}={},now=new Date().toISOString()){
     const prior=saved.transactions.find(record=>record.id===transaction.id);
-    let next={...prior,...transaction,id:transaction.id||crypto.randomUUID()},bills=saved.recurringCharges||[];
+    let next={...prior,...transaction,id:transaction.id||crypto.randomUUID()},bills=Housing.currentBills(saved);
     if(next.recurringChargeId){
       const bill=bills.find(record=>record.id===next.recurringChargeId);
       const portion=paymentPortion(next);
@@ -75,7 +76,7 @@
       if(updateMonthlyEstimate)throw new Error('Choose a monthly bill before updating its estimate.');
       delete next.recurringChargeId;delete next.oneTimeAmount;
     }
-    return {...saved,recurringCharges:bills,transactions:prior?saved.transactions.map(record=>record.id===next.id?next:record):[...saved.transactions,next]};
+    return Housing.captureEstimates(saved,{...saved,recurringCharges:(saved.recurringCharges||[]).map(b=>b.id===next.recurringChargeId&&updateMonthlyEstimate?bills.find(x=>x.id===b.id):b),transactions:prior?saved.transactions.map(record=>record.id===next.id?next:record):[...saved.transactions,next]});
   }
   const api={active,total,upsert,deactivate,migrate,status,actualStatus,paymentPortion,saveTransaction};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
