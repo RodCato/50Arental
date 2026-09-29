@@ -19,6 +19,7 @@ export async function verifySource(bytes,authorized=SOURCE){
 }
 export function money(v,scale=2){const n=Number(v??0);requireThat(Number.isFinite(n)&&n>=0&&n<10**(12-scale)&&Math.abs(n*10**scale-Math.round(n*10**scale))<1e-6,'Numeric value cannot be represented losslessly in schema');return n;}
 export function mapSource(b,owner,sourceHash){
+ if(Object.values(b.state.housingFinance||{}).some(rows=>rows.length))throw Error('The Phase 2A migration tool cannot import Housing Coverage; use a compatible restore workflow.');
  if(b.state.vehicles?.length||b.state.fuelEvents?.length)throw Error('The Phase 2A migration tool cannot import Automotive; use a compatible restore workflow.');
  requireThat(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(owner),'Invalid owner UUID');
  const s=b.state,st=s.settings,w=st.waterdropPayback;

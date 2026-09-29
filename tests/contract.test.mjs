@@ -1,8 +1,8 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
-import {Compatibility,CURRENT_CONTRACT,contractKey,classify,missing} from '../cloud/contract.mjs';
+import {Compatibility,CURRENT_CONTRACT,DOMAIN_VERSIONS,contractKey,classify,missing} from '../cloud/contract.mjs';
 import {DeviceLedger} from '../cloud/device.mjs';import {baselineFixture} from './cloud-fixture.mjs';import {fromCloud} from '../cloud/ledger-model.mjs';import Auto from '../automotive-utils.js';import {checkSnapshot} from '../scripts/check-cloud-contract.mjs';
 const store=()=>{const m=new Map();return {getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)}};
-const legacy={contract_version:1,domains:CURRENT_CONTRACT.domains.filter(d=>!['vehicles','fuel_events'].includes(d)),features:['tax_bucket','multi_property_photos'],read_versions:[1]};
+const legacy={contract_version:1,domains:CURRENT_CONTRACT.domains.filter(d=>DOMAIN_VERSIONS[d]===1),features:['tax_bucket','multi_property_photos'],read_versions:[1]};
 const change=d=>({[d]:{put:[],remove:['id']}});
 function setup(){const storage=store();let backend=CURRENT_CONTRACT,error;const args={storage,project:'https://project.supabase.co',owner:'owner',probe:async()=>{if(error)throw error;return backend}};return {args,c:new Compatibility(args),backend:c=>backend=c,error:e=>error=e};}
 test('unknown fails closed; compatible verifies; legacy permits compatible domains only',async()=>{const {c,backend}=setup();assert.throws(()=>c.assert(change('vehicles')),/Cloud update/);await c.check();c.assert(change('vehicles'));backend(legacy);await c.check();assert.equal(c.state,'incompatible');assert.throws(()=>c.assert(change('vehicles')),/Cloud update/);for(const d of legacy.domains)c.assert(change(d));assert.throws(()=>c.assert({transaction_items:{put:[{bucket:'automotive'}],remove:[]}}));});

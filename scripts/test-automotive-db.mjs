@@ -1,4 +1,5 @@
-import {CURRENT_CONTRACT} from '../cloud/contract.mjs';
+// Contract expected at the Automotive migration, before later feature migrations.
+const CURRENT_CONTRACT={contract_version:2,domains:['transactions','transaction_items','recurring_charges','water_events','user_settings','benchmark_adjustments','property_condition','attachments','vehicles','fuel_events'],features:['tax_bucket','multi_property_photos','automotive_transaction_link'],read_versions:[1,2]};
 // Disposable socket-only PostgreSQL. No production URL/credentials are accepted.
 import {mkdtemp,readFile,rm} from 'node:fs/promises';import {execFileSync} from 'node:child_process';import {join} from 'node:path';import {tmpdir} from 'node:os';import assert from 'node:assert/strict';
 import {baselineFixture} from '../tests/cloud-fixture.mjs';import {applySQL,quote} from './migration/sql.mjs';import {fromCloud,toCloud,diff} from '../cloud/ledger-model.mjs';import U from '../automotive-utils.js';import Backup from '../backup-utils.js';
