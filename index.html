@@ -30,7 +30,8 @@
         <strong id="monthlyExpenses">$0.00</strong>
         <small>actual expenses across all non-deposit categories</small>
       </article>
-      <article class="metric"><span>Housing cost this month</span><strong id="monthlyHousing">$0.00</strong><small>housing + utilities; groceries excluded</small></article>
+      <article class="metric"><span>Actual housing expenses recorded</span><strong id="monthlyHousing">$0.00</strong><small>Recorded housing transactions this month</small></article>
+      <article class="metric"><span>Expected monthly housing obligations</span><strong id="expectedHousing">$0.00</strong><small>Active recurring bills, including estimates</small></article>
       <article class="metric"><span>Groceries this month</span><strong id="monthlyGroceries">$0.00</strong><small>tracked separately</small></article>
     </section>
 
@@ -42,26 +43,26 @@
             <p id="benchmarkSummary" class="benchmark-summary">No current-month transactions yet.</p>
           </div>
           <div class="benchmark-callout">
-            <span>Under / over benchmark</span>
+            <span>Recorded housing cost vs. Josh</span>
             <strong id="benchmarkDifference">$0.00</strong>
             <small id="benchmarkDifferenceLabel">based on this month's housing spend</small>
           </div>
         </div>
         <div class="benchmark-grid">
-          <article class="benchmark-metric featured"><span>50A housing cost this month</span><strong id="housingTotal">$0.00</strong><small>recurring + one-time + utilities</small></article>
+          <article class="benchmark-metric featured"><span>Recorded housing this month</span><strong id="housingTotal">$0.00</strong><small>recurring + one-time + utilities</small></article>
           <article class="benchmark-metric"><span>Josh effective benchmark</span><strong id="joshBenchmark">$0.00</strong><small id="joshFormula">Rent + mandatory adjustments amortized over stay</small></article>
-          <article class="benchmark-metric"><span>Known recurring run-rate</span><strong id="recurringHousing">$0.00</strong><small id="recurringStatus"></small></article>
+          <article class="benchmark-metric"><span>Expected recurring obligations</span><strong id="recurringHousing">$0.00</strong><small id="recurringStatus"></small></article>
           <article class="benchmark-metric"><span>One-time 50A purchases</span><strong id="oneTimeHousing">$0.00</strong><small>not amortized</small></article>
           <article class="benchmark-metric"><span>Utilities</span><strong id="utilities">$0.00</strong><small id="utilitiesStatus"></small></article>
           <article class="benchmark-metric grocery-metric"><span>Groceries</span><strong id="groceries">$0.00</strong><small>tracked separately; excluded from benchmark</small></article>
         </div>
         <div class="savings-grid">
-          <div><span>Projected recurring monthly savings vs Josh</span><strong id="monthlySavings">$0.00</strong></div>
-          <div><span>Projected savings across recorded months</span><strong id="cumulativeSavings">$0.00</strong></div>
+          <div><span>Projected recurring difference vs. Josh / month</span><strong id="monthlySavings">$0.00</strong></div>
+          <div><span>Current projection × recorded months (not realized savings)</span><strong id="cumulativeSavings">$0.00</strong></div>
           <div><span>Projected annual savings</span><strong id="annualSavings">$0.00</strong><small>Projected recurring monthly savings × 12</small></div>
         </div>
       </section>
-      <p class="benchmark-note">Groceries and other non-housing expenses are excluded from the Josh housing comparison.</p>
+      <p class="benchmark-note">Recorded costs may be incomplete; the gap is not realized savings or proof bills were paid. Recurring differences are projections. Groceries and other non-housing expenses are excluded from the Josh housing comparison.</p>
       <section class="payback-card" aria-labelledby="paybackName">
         <div class="payback-head"><div><p class="eyebrow">SAVINGS CHALLENGE</p><h2 id="paybackName">Waterdrop Challenge</h2><p id="paybackStatus" class="benchmark-summary">GALLON 59 — BREAK EVEN</p></div><button id="addGallonBtn" type="button" class="accent">+1 GALLON</button></div>
         <div class="progress payback-progress"><div id="paybackProgress"></div></div>
