@@ -56,6 +56,7 @@ try{
  housing=H.put(housing,'income_sources',{id:'portable-source',name:'Synthetic source',source_type:'employment',active:true,hourly_rate_cents:1600,typical_shift_hundredths:null});
  housing=H.put(housing,'work_sessions',{id:'portable-shift',income_source_id:'portable-source',work_date:'2026-09-01',hours_hundredths:800,hourly_rate_cents:1600,notes:''});
  housing=H.put(housing,'coverage_settings',{...H.data(housing).coverage_settings[0],income_source_id:'portable-source'});
+ housing=H.revise(housing,housing.recurringCharges[0],'2026-10',true,{effective_date:'2026-10-01',due_day:31,autopay:false});
  const hb=await U.create(housing,f.get);await page.locator('#importInput').setInputFiles({name:'synthetic-housing-v3.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(hb))});
  await page.waitForFunction(()=>state.housingFinance?.income_sources?.length===1&&!document.body.inert);
  await page.reload();await page.waitForFunction(()=>state.housingFinance?.income_sources?.length===1&&!document.body.inert);

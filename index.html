@@ -28,10 +28,12 @@
       <article class="metric primary">
         <span>Total expenses this month</span>
         <strong id="monthlyExpenses">$0.00</strong>
-        <small>actual expenses across all non-deposit categories</small>
+        <small>recorded expenses + scheduled fixed bills; deposits held excluded</small>
       </article>
-      <article class="metric"><span>Actual housing expenses recorded</span><strong id="monthlyHousing">$0.00</strong><small>Recorded housing transactions this month</small></article>
+      <article class="metric"><span>Housing expenses (recorded + scheduled)</span><strong id="monthlyHousing">$0.00</strong><small>Includes automatically recognized fixed bills</small></article>
       <article class="metric"><span>Expected monthly housing obligations</span><strong id="expectedHousing">$0.00</strong><small>Active recurring bills, including estimates</small></article>
+      <article class="metric"><span>Recorded variable-bill actuals</span><strong id="variableActual">$0.00</strong><small>Linked actual charges this month</small></article>
+      <article class="metric"><span>Variable estimates outstanding</span><strong id="variableOutstanding">$0.00</strong><small>Projection only; excluded from recognized expenses</small></article>
       <article class="metric"><span>Groceries this month</span><strong id="monthlyGroceries">$0.00</strong><small>tracked separately</small></article>
     </section>
 
@@ -43,13 +45,13 @@
             <p id="benchmarkSummary" class="benchmark-summary">No current-month transactions yet.</p>
           </div>
           <div class="benchmark-callout">
-            <span>Recorded housing cost vs. Josh</span>
+            <span>Recognized housing cost vs. Josh</span>
             <strong id="benchmarkDifference">$0.00</strong>
             <small id="benchmarkDifferenceLabel">based on this month's housing spend</small>
           </div>
         </div>
         <div class="benchmark-grid">
-          <article class="benchmark-metric featured"><span>Recorded housing this month</span><strong id="housingTotal">$0.00</strong><small>recurring + one-time + utilities</small></article>
+          <article class="benchmark-metric featured"><span>Recognized housing this month</span><strong id="housingTotal">$0.00</strong><small>recurring + one-time + utilities</small></article>
           <article class="benchmark-metric"><span>Josh effective benchmark</span><strong id="joshBenchmark">$0.00</strong><small id="joshFormula">Rent + mandatory adjustments amortized over stay</small></article>
           <article class="benchmark-metric"><span>Expected recurring obligations</span><strong id="recurringHousing">$0.00</strong><small id="recurringStatus"></small></article>
           <article class="benchmark-metric"><span>One-time 50A purchases</span><strong id="oneTimeHousing">$0.00</strong><small>not amortized</small></article>
@@ -62,7 +64,7 @@
           <div><span>Projected annual savings</span><strong id="annualSavings">$0.00</strong><small>Projected recurring monthly savings × 12</small></div>
         </div>
       </section>
-      <p class="benchmark-note">Recorded costs may be incomplete; the gap is not realized savings or proof bills were paid. Recurring differences are projections. Groceries and other non-housing expenses are excluded from the Josh housing comparison.</p>
+      <p class="benchmark-note">Recognized costs include scheduled fixed bills; variable actuals may be incomplete. The gap is not realized savings or proof bills were paid. Recurring differences are projections. Groceries and other non-housing expenses are excluded from the Josh housing comparison.</p>
       <section class="payback-card" aria-labelledby="paybackName">
         <div class="payback-head"><div><p class="eyebrow">SAVINGS CHALLENGE</p><h2 id="paybackName">Waterdrop Challenge</h2><p id="paybackStatus" class="benchmark-summary">GALLON 59 — BREAK EVEN</p></div><button id="addGallonBtn" type="button" class="accent">+1 GALLON</button></div>
         <div class="progress payback-progress"><div id="paybackProgress"></div></div>
@@ -90,12 +92,12 @@
     <section id="income" class="tab-panel"><div id="housingIncome"></div></section>
     <section id="monthly" class="tab-panel">
       <div class="toolbar month-toolbar">
-        <div><p class="eyebrow">MONTHLY LEDGER</p><h2>Monthly expenses</h2><p>Review actual spending by calendar month.</p></div>
+        <div><p class="eyebrow">MONTHLY LEDGER</p><h2>Monthly expenses</h2><p>Review recorded and scheduled expenses by calendar month.</p></div>
         <button id="addTransactionBtn" class="accent">+ Add transaction</button>
         <div class="month-controls"><button id="previousMonthBtn" type="button" class="ghost compact" aria-label="Previous month">←</button><input id="monthInput" type="month" aria-label="Selected month" /><button id="nextMonthBtn" type="button" class="ghost compact" aria-label="Next month">→</button></div>
       </div>
       <div class="monthly-summary-grid">
-        <article class="metric primary"><span>Total expenses</span><strong id="selectedExpenses">$0.00</strong><small>actual expenses; deposits held excluded</small></article>
+        <article class="metric primary"><span>Total expenses</span><strong id="selectedExpenses">$0.00</strong><small>recorded + scheduled fixed bills; deposits held excluded</small></article>
         <article class="metric"><span>Housing</span><strong id="selectedHousing">$0.00</strong><small>recurring housing</small></article>
         <article class="metric"><span>Utilities</span><strong id="selectedUtilities">$0.00</strong><small>included in housing comparison</small></article>
         <article class="metric"><span>Household / one-time</span><strong id="selectedOneTime">$0.00</strong><small>not recurring</small></article>
@@ -105,11 +107,12 @@
         <article class="metric"><span>Other / excluded</span><strong id="selectedOther">$0.00</strong><small>visible, outside housing comparison</small></article>
       </div>
       <div class="monthly-comparison"><strong id="selectedComparison">50A housing cost: $0.00 · Josh: $0.00</strong><span id="selectedComparisonDifference">$0.00 under/over Josh</span><small>Groceries and other non-housing expenses are excluded from the Josh housing comparison.</small></div>
+      <section id="monthlyRecurringBills" class="cards"></section>
       <div class="filter-row" role="group" aria-label="Monthly transaction filters"><button type="button" class="filter-button active" data-month-filter="all">All</button><button type="button" class="filter-button" data-month-filter="housing">Housing</button><button type="button" class="filter-button" data-month-filter="utilities">Utilities</button><button type="button" class="filter-button" data-month-filter="setup">Household/setup</button><button type="button" class="filter-button" data-month-filter="groceries">Groceries</button><button type="button" class="filter-button" data-month-filter="automotive">Automotive</button><button type="button" class="filter-button" data-month-filter="tax">Sales tax</button><button type="button" class="filter-button" data-month-filter="other">Excluded/other</button></div>
       <section id="categorySummary" class="category-summary" aria-live="polite">
         <div><p class="eyebrow">SELECTED-MONTH CATEGORY TOTAL</p><h3 id="categorySummaryTitle">All expenses — August 2026</h3><p id="categorySummaryScope">Selected month spending</p><small id="categoryAllTimeContext">All-time All expenses: $0.00</small></div>
-        <div class="category-summary-net"><span>Net spent</span><strong id="categoryNetSpent">$0.00</strong></div>
-        <div class="category-summary-secondary"><span>Gross purchases <strong id="categoryGrossPurchases">$0.00</strong></span><span>Refunds recovered <strong id="categoryRefunds">$0.00</strong></span></div>
+        <div class="category-summary-net"><span>Recognized expenses</span><strong id="categoryNetSpent">$0.00</strong></div>
+        <div class="category-summary-secondary"><span>Before refunds <strong id="categoryGrossPurchases">$0.00</strong></span><span>Refunds recovered <strong id="categoryRefunds">$0.00</strong></span></div>
       </section>
       <div id="monthlyTransactions" class="cards empty-state">No transactions for this month.</div>
     </section>
@@ -328,6 +331,7 @@
       <p class="settings-help">Normal monthly housing cost, excluding one-time fees. Variable amounts are estimates.</p>
       <div id="billCoverageFields"><label>Effective month<input name="effectiveMonth" type="month" required></label><label><input name="included" type="checkbox"> Counts toward Housing Coverage</label><p class="meta">Applies from this month until the next revision. Choosing an existing month corrects that revision. Earlier months stay unchanged. Scheduled changes take effect in their selected month.</p></div>
       <div class="form-grid">
+        <label>Effective start date<input name="effectiveDate" type="date" required></label><label>Due day (optional; 1–31)<input name="dueDay" type="number" min="1" max="31" step="1"></label><label class="bill-active"><input name="autopay" type="checkbox" checked> Autopay</label><p class="meta">Changes apply to the selected month. Deactivation begins on the first day of a month. Due days beyond month end mean its last day. Scheduled recognition is not bank confirmation.</p>
         <label>Name<input name="name" required maxlength="120" /></label>
         <label>Monthly amount ($)<input name="amount" required type="number" min="0" step="0.01" /></label>
         <label>Category<input name="category" required list="billCategories" maxlength="80" value="Housing" /></label>
@@ -360,8 +364,8 @@
   <script src="waterdrop-utils.js"></script>
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
   <script src="housing-utils.js"></script>
-  <script src="recurring-utils.js"></script>
   <script src="finance-utils.js"></script>
+  <script src="recurring-utils.js"></script>
   <script src="automotive-utils.js"></script>
   <script src="backup-utils.js"></script>
   <script src="backup-storage.js"></script>

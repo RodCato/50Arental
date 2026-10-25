@@ -1,6 +1,7 @@
-/* Monthly obligations stay independent; payment saves may explicitly update an estimate. */
+/* Effective-dated recurring reporting; virtual occurrences never mutate ledger data. */
 (function(root){
   const Housing=typeof module!=='undefined'&&module.exports?require('./housing-utils.js'):root.HousingUtils;
+  const Finance=typeof module!=='undefined'&&module.exports?require('./finance-utils.js'):root.FinanceUtils;
   const VERSION=1;
   const active=records=>(records||[]).filter(record=>record.active!==false);
   const total=records=>active(records).reduce((cents,record)=>cents+Math.round(Number(record.amount)*100),0)/100;
@@ -78,7 +79,33 @@
     }
     return Housing.captureEstimates(saved,{...saved,recurringCharges:(saved.recurringCharges||[]).map(b=>b.id===next.recurringChargeId&&updateMonthlyEstimate?bills.find(x=>x.id===b.id):b),transactions:prior?saved.transactions.map(record=>record.id===next.id?next:record):[...saved.transactions,next]});
   }
-  const api={active,total,upsert,deactivate,migrate,status,actualStatus,paymentPortion,saveTransaction};
+  // Identity belongs to the reporting occurrence, not a second transaction record.
+  function monthly(saved,month,today=Housing.localMonth()+'-'+String(new Date().getDate()).padStart(2,'0')){
+    Housing.month(month);const current=today.slice(0,7),revisions=Housing.data(saved).recurring_charge_revisions;
+    const transactions=(saved.transactions||[]).filter(t=>t.date.slice(0,7)===month),automatic=[],occurrences=[];
+    for(const bill of saved.recurringCharges||[]){
+      const revision=Housing.latest(revisions.filter(r=>r.recurring_charge_id===bill.id),month);
+      const linked=transactions.filter(t=>t.recurringChargeId===bill.id);
+      // No inferred historical start: a revision is required for automatic recognition.
+      if(!revision||!revision.active){if(!linked.length)continue;}
+      const amount=revision?revision.amount_cents/100:bill.amount,kind=revision?.kind||bill.kind;
+      const start=revision?.effective_date||revision?.effective_month+'-01';
+      const eligible=!!revision&&revision.active&&month<=current&&start<=today;
+      const isUtility=!!(revision?.utility_type||bill.utilityType)||['Utilities','Internet'].includes(revision?.category||bill.category);
+      const bucket=isUtility?'utilities':'housing_recurring';
+      const actual=linked.reduce((n,t)=>n+Math.round(Finance.expenses(t.items).expenses*100),0)/100;
+      const service=linked.reduce((n,t)=>n+Math.round(paymentPortion(t).recurringAmount*100),0)/100;
+      const auto=eligible&&kind==='fixed'&&!linked.length;
+      const item={name:bill.name,amount,category:isUtility?'Utilities':'Other',bucket,status:'kept',adjustment:0,setupClass:'none'};
+      if(auto)automatic.push(item);
+      occurrences.push({key:`recurring:${bill.id}:${month}`,billId:bill.id,name:bill.name,month,kind,bucket,amount,actual,service,linkedIds:linked.map(t=>t.id),automatic:auto,recognized:auto?amount:actual,estimate:kind==='estimated'&&!linked.length&&revision?.active?amount:0,eligible,dueDay:revision?.due_day??null,dueDate:revision?.due_day?month+'-'+String(Math.min(revision.due_day,new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).getDate())).padStart(2,'0'):null,autopay:revision?.autopay??true,start,status:linked.length?'Recorded actual':!eligible?'Projected / not yet recognized':kind==='estimated'?'Awaiting actual amount':revision.autopay===false?'Scheduled':'Scheduled / Autopay'});
+    }
+    const total=Finance.expenses([...transactions.flatMap(t=>t.items),...automatic]);
+    const sum=fn=>occurrences.reduce((n,o)=>n+Math.round(fn(o)*100),0)/100;
+    return {occurrences,automatic,totals:total,fixedRecognized:sum(o=>o.automatic?o.amount:0),variableActual:sum(o=>o.kind==='estimated'?o.actual:0),outstanding:sum(o=>o.estimate),projected:sum(o=>o.kind==='estimated'&&o.linkedIds.length?o.service:o.amount)};
+  }
+  function occurrenceMonths(saved,today){const end=today.slice(0,7),starts=Housing.data(saved).recurring_charge_revisions.map(r=>r.effective_month).sort();if(!starts.length)return [];const out=[];let m=starts[0];while(m<=end){out.push(m);if(out.length>1200)throw Error('Recurring history exceeds supported range');let [y,n]=m.split('-').map(Number);if(++n===13){n=1;y++}m=`${String(y).padStart(4,'0')}-${String(n).padStart(2,'0')}`}return out}
+  const api={active,total,upsert,deactivate,migrate,status,actualStatus,paymentPortion,saveTransaction,monthly,occurrenceMonths};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   else root.RecurringUtils=api;
 })(globalThis);

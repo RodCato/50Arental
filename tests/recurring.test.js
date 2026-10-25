@@ -5,7 +5,7 @@ const RecurringUtils=require('../recurring-utils.js');
 const source=fs.readFileSync(require('node:path').join(__dirname,'..','app.js'),'utf8');
 const declaration=name=>name==='reconciledTransactions'?source.slice(source.indexOf('function reconciledTransactions('),source.indexOf("\n$('#seedBtn').onclick")):source.split('\n').find(line=>line.startsWith(`function ${name}(`)||line.startsWith(`const ${name}=`));
 const context={HousingUtils:require('../housing-utils.js'),FinanceUtils:require('../finance-utils.js'),RecurringUtils,crypto:require('node:crypto').webcrypto,localStorage:{getItem:()=>null},console};
-vm.createContext(context);
+vm.createContext(context);vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'..','date-utils.js'),'utf8'),context);
 vm.runInContext([source.split('\n').slice(0,7).join('\n'),...['normalizeSettings','inferSetupClass','validImageSource','normalizeTransactions','isKnownLegacyDemo','migrateLegacyDemoTransactions','migrateRecurringSpectrumToUtility','reconciledTransactions','load','nextMonthDate','inferBucket','netItem','depositReturned','depositExpense','monthItems','expenseTotalsForMonth','benchmarkTotalsForMonth'].map(declaration)].join('\n'),context);
 const run=code=>vm.runInContext(code,context);
 run(`var state=RecurringUtils.migrate(migrateRecurringSpectrumToUtility(load()));`);
