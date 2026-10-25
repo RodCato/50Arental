@@ -47,14 +47,22 @@
  }
  function currentBills(s,m=localMonth()){const d=data(s);if(!latest(d.coverage_settings,m))return s.recurringCharges||[];return (s.recurringCharges||[]).map(b=>{const rows=d.recurring_charge_revisions.filter(r=>r.recurring_charge_id===b.id),r=latest(rows,m);return r?{...b,amount:r.amount_cents/100,active:r.active,kind:r.kind,category:r.category,utilityType:r.utility_type}:rows.length?{...b,active:false}:b})}
  function target(s,m){month(m);const d=data(s),config=latest(d.coverage_settings,m);if(!config)return {established:false,cents:null,bills:[],config:null};const bills=(s.recurringCharges||[]).map(b=>latest(d.recurring_charge_revisions.filter(r=>r.recurring_charge_id===b.id),m)).filter(r=>r&&r.active&&r.included);return {established:true,cents:bills.reduce((sum,r)=>add(sum,r.amount_cents),0),bills,config}}
- function earnings(s,sourceId,m){const d=data(s),pays=d.paychecks.filter(p=>p.income_source_id===sourceId),covered=d.work_sessions.filter(w=>w.income_source_id===sourceId&&w.work_date.slice(0,7)===m);let estimated=0,actual=0,superseded=0,hasActual=false;
-  for(const w of covered){if(pays.some(p=>p.period_start&&w.work_date>=p.period_start&&w.work_date<=p.period_end))superseded=add(superseded,gross(w));else estimated=add(estimated,gross(w))}
-  for(const p of pays.filter(p=>p.period_start)){const start=Date.parse(p.period_start+'T00:00:00Z'),end=Date.parse(p.period_end+'T00:00:00Z'),days=Math.round((end-start)/86400000)+1,q=Math.floor(p.net_cents/days),remainder=p.net_cents%days;for(let i=0;i<days;i++)if(new Date(start+i*86400000).toISOString().slice(0,7)===m){hasActual=true;actual=add(actual,q+(i<remainder?1:0))}}
-  return {estimated,actual,superseded,total:add(estimated,actual),unreconciled:pays.filter(p=>!p.period_start).length,label:hasActual&&estimated?'Actual net + estimated gross':hasActual?'Actual net pay':'Estimated gross earnings'};
+ // Received-income policy: legacy hours and pay periods remain stored, not allocated.
+ function earnings(s,sourceId,m){
+  month(m);const pays=data(s).paychecks.filter(p=>p.income_source_id===sourceId&&p.pay_date.slice(0,7)===m);
+  const actual=pays.reduce((sum,p)=>add(sum,p.net_cents),0);
+  return {estimated:0,actual,superseded:0,total:actual,unreconciled:0,label:'Actual net income received'};
  }
- function coverage(s,m){const t=target(s,m),d=data(s),source=d.income_sources.find(r=>r.id===t.config?.income_source_id),e=earnings(s,source?.id||null,m);if(!t.established)return {month:m,target:t,source,earnings:e};const covered=Math.min(e.total,t.cents),remaining=Math.max(t.cents-e.total,0),surplus=Math.max(e.total-t.cents,0),goal=d.financial_goals.find(g=>g.id===t.config.goal_id&&g.active&&!g.completed),hours=source?.hourly_rate_cents?remaining/source.hourly_rate_cents:null;
+ function paycheckStatus(s,p,m){
+  month(m);const d=data(s),t=target(s,m),source=d.income_sources.find(r=>r.id===p.income_source_id),received=p.pay_date.slice(0,7)===m;
+  const selected=t.established&&t.config.income_source_id===p.income_source_id;
+  const reason=!t.established?'Not allocated: housing target not established for this month.':!selected?'Not allocated: this income source is not selected for this coverage month.':!received?'Not allocated: pay date is outside this month.':'Included as actual net income received. Coverage is capacity to pay, not a bill payment.';
+  return {source:source?.name||'Missing source',confirmed:true,earned:received?p.net_cents:0,allocated:selected&&received?p.net_cents:0,reason,period:'Received in '+p.pay_date.slice(0,7)};
+ }
+ function defaultSource(s,m){const d=data(s),selected=target(s,m).config?.income_source_id;return d.income_sources.find(r=>r.id===selected)||d.income_sources.find(r=>r.active)||d.income_sources[0]||null}
+ function coverage(s,m){const t=target(s,m),d=data(s),source=d.income_sources.find(r=>r.id===t.config?.income_source_id),e=earnings(s,source?.id||null,m);if(!t.established)return {month:m,target:t,source,earnings:e};const covered=Math.min(e.total,t.cents),remaining=Math.max(t.cents-e.total,0),surplus=Math.max(e.total-t.cents,0),goal=d.financial_goals.find(g=>g.id===t.config.goal_id&&g.active&&!g.completed),hours=null;
   return {month:m,target:t,source,earnings:e,covered,percent:t.cents?Math.min(100,covered/t.cents*100):0,remaining,surplus,freed:covered,hours,shifts:hours!==null&&source?.typical_shift_hundredths?hours/(source.typical_shift_hundredths/100):null,goal,available:goal?surplus:0};
  }
  function history(s,end=localMonth()){const starts=data(s).coverage_settings.map(r=>r.effective_month).sort();if(!starts.length)return [];const out=[];let m=starts[0];while(m<=end){out.push(coverage(s,m));if(out.length>1200)break;let [y,n]=m.split('-').map(Number);if(++n===13){n=1;y++}m=`${String(y).padStart(4,'0')}-${String(n).padStart(2,'0')}`}return out.reverse()}
- const api={fields,tables,empty,data,validate,money,date,month,localMonth,gross,put,revise,baseline,billEdit,captureEstimates,currentBills,target,earnings,coverage,history,latest};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.HousingUtils=api;
+ const api={fields,tables,empty,data,validate,money,date,month,localMonth,gross,put,revise,baseline,billEdit,captureEstimates,currentBills,target,earnings,coverage,history,latest,paycheckStatus,defaultSource};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.HousingUtils=api;
 })(globalThis);
