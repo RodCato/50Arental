@@ -58,8 +58,8 @@ try{
  housing=H.put(housing,'coverage_settings',{...H.data(housing).coverage_settings[0],income_source_id:'portable-source'});
  housing=H.revise(housing,housing.recurringCharges[0],'2026-10',true,{effective_date:'2026-10-01',due_day:31,autopay:false});
  const hb=await U.create(housing,f.get);await page.locator('#importInput').setInputFiles({name:'synthetic-housing-v3.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(hb))});
- await page.waitForFunction(()=>state.housingFinance?.income_sources?.length===1&&!document.body.inert);
- await page.reload();await page.waitForFunction(()=>state.housingFinance?.income_sources?.length===1&&!document.body.inert);
+ await page.waitForFunction(()=>window.LedgerApp?.get()?.housingFinance?.income_sources?.length===1&&!document.body.inert);
+ await page.reload();await page.waitForFunction(()=>window.LedgerApp?.get()?.housingFinance?.income_sources?.length===1&&!document.body.inert);
  const restoredHousing=await page.evaluate(async()=>({backup:await BackupUtils.create(state,attachmentGet),history:HousingUtils.history(state,'2026-10')}));assert.deepEqual(restoredHousing.backup.state,hb.state);assert.equal(restoredHousing.backup.integrity.stateSha256,hb.integrity.stateSha256);assert.deepEqual(restoredHousing.history,H.history(housing,'2026-10'));console.log('PASS: populated Housing Backup v3 UI restore, real IDB/reload/re-export, identical state hash and reconstructed history');
  // Fail actual application render on the next activated-generation startup.
  const beforeRenderFailure=await page.evaluate(()=>localStorage.getItem('fiftyA-ledger-v1'));
