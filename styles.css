@@ -84,3 +84,14 @@
 .beneficiary-filter{display:block;max-width:24rem;margin:1rem 0}
 .beneficiary-report{border:1px solid var(--border,#d0d5dd);border-radius:12px;padding:1rem;margin:1rem 0}
 .beneficiary-report>strong{font-size:1.5rem}.beneficiary-report ul{padding-left:1.25rem}.beneficiary-report li{overflow-wrap:anywhere}
+
+/* Payment-only utility history: dollars on a shared axis within each service. */
+.utility-payment-history{margin:16px 0;border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0}
+.utility-payment-history>summary,.utility-values>summary{min-height:44px;cursor:pointer;align-content:center;font-weight:650;overflow-wrap:anywhere}
+.utility-history-intro{font-weight:650}.utility-unclassified{border-left:3px solid var(--accent);padding:8px 12px;margin:16px 0;overflow-wrap:anywhere}
+.utility-history-cards{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}.utility-history-card{min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.utility-primary-total{display:block;font-size:1.8rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.utility-comparison{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;font-size:.85rem}.utility-comparison dd{margin:0;text-align:right;overflow-wrap:anywhere}
+.utility-dollar-chart{margin-top:16px;font-variant-numeric:tabular-nums}.utility-dollar-axis{display:flex;justify-content:space-between;font-size:.75rem;gap:8px;margin-left:62px;margin-right:66px;overflow-wrap:anywhere}.utility-axis-caption{font-size:.7rem;color:var(--muted);text-align:center}
+.utility-dollar-row{display:grid;grid-template-columns:62px minmax(0,1fr) 66px;align-items:center;gap:4px;min-height:34px;font-size:.75rem}.utility-month-label{line-height:1.2}.utility-bar-value{text-align:right;overflow-wrap:anywhere}.utility-bar-track{height:22px;position:relative;background:var(--bg);border-bottom:1px solid var(--line)}.utility-zero-line{position:absolute;top:0;bottom:0;width:1px;background:var(--muted);z-index:1}.utility-dollar-bar{position:absolute;top:3px;height:16px;background:var(--accent);border-radius:2px}.utility-dollar-bar.credit{background:var(--muted)}.utility-dollar-bar.partial{opacity:.65}.utility-no-data{display:block;text-align:center;color:var(--muted)}
+.utility-values{margin-top:12px}.utility-values table{width:100%;table-layout:fixed;font-size:.8rem;border-collapse:collapse}.utility-values th,.utility-values td{padding:6px 3px;border-bottom:1px solid var(--line);text-align:left;overflow-wrap:anywhere}.utility-values caption{text-align:left;color:var(--muted);margin:8px 0}.utility-values summary:focus-visible,.utility-payment-history>summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media(min-width:850px){.utility-history-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
