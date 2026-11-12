@@ -34,6 +34,7 @@
 
   <main class="shell">
     <section id="overview" class="tab-panel active">
+    <p id="leaseNoticeAlert" class="lease-notice-alert" role="status" aria-live="polite" hidden></p>
     <section id="housingCoverageCard" class="benchmark-card" aria-label="Housing Coverage"></section>
     <section id="overviewMetrics" class="hero-grid">
       <article class="metric primary">
@@ -87,6 +88,10 @@
         <details class="payback-history"><summary>Recent gallons</summary><div id="paybackHistory"></div></details>
         <button id="undoGallonBtn" type="button" class="ghost compact payback-undo">Undo last gallon</button>
       </section>
+      <details id="leaseTracker" class="benchmark-card lease-disclosure">
+        <summary id="leaseTrackerSummary"><span class="lease-chevron" aria-hidden="true">›</span><span><strong>Lease Tracker</strong><span id="leaseTrackerStatus">Unverified</span></span></summary>
+        <div id="leaseTrackerContent"></div>
+      </details>
     </section>
 
 
@@ -375,6 +380,7 @@
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
   <script src="housing-utils.js"></script>
   <script src="finance-utils.js"></script>
+  <script src="lease-utils.js"></script>
   <script src="recurring-utils.js"></script>
   <script src="utilities-utils.js"></script>
   <script src="automotive-utils.js"></script>
@@ -382,6 +388,7 @@
   <script src="backup-storage.js"></script>
   <script src="backup-boot.js"></script>
   <script defer src="housing-ui.js"></script>
+  <script defer src="lease-ui.js"></script>
   <script defer src="automotive-ui.js"></script>
   <script defer src="utilities-ui.js"></script>
   <script defer src="cloud-foundation.js"></script>

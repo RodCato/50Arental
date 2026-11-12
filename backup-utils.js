@@ -3,6 +3,7 @@
   const Finance=typeof module!=='undefined'&&module.exports?require('./finance-utils.js'):root.FinanceUtils;
   const Automotive=typeof module!=='undefined'&&module.exports?require('./automotive-utils.js'):root.AutomotiveUtils;
   const Housing=typeof module!=='undefined'&&module.exports?require('./housing-utils.js'):root.HousingUtils;
+  const Lease=typeof module!=='undefined'&&module.exports?require('./lease-utils.js'):root.LeaseUtils;
   const FORMAT='50a-ledger-backup',VERSION=3,MAX_BYTES=128*1024*1024,MAX_IMAGE=20*1024*1024;
   // JSON would silently turn NaN/Infinity into null, which is a legacy zero only in specific fields.
   const clone=value=>JSON.parse(JSON.stringify(value,(_key,v)=>{if(typeof v==='number'&&!Number.isFinite(v))fail('$','nonfinite number');return v}));
@@ -40,7 +41,7 @@
   function keys(value,allowed,p){object(value,p);for(const k of Object.keys(value))if(!allowed.includes(k))fail(p,'unsupported field')}
   const txFields=['id','date','merchant','notes','items','receipt','attachmentIds','recurringChargeId','oneTimeAmount','systemKey','sampleKey'];
   const itemFields=['beneficiary','name','amount','category','bucket','setupClass','status','adjustment','depositStatus','depositRefunded','moveIn','prorated','estimated','recurring','giftCardOffset'];
-  const settingsFields=['rent50a','joshRent','joshAdjustments','joshStayDays','joshCleaning','moveInDate','proratedRent','adminFee','depositAmount','depositStatus','depositRefunded','forgottenEssentialsBudget','waterdropPayback'];
+  const settingsFields=['leaseTracker','rent50a','joshRent','joshAdjustments','joshStayDays','joshCleaning','moveInDate','proratedRent','adminFee','depositAmount','depositStatus','depositRefunded','forgottenEssentialsBudget','waterdropPayback'];
   const billFields=['id','name','amount','category','kind','utilityType','active','createdAt','updatedAt'];
   const conditionFields=['id','room','phase','date','notes','attachmentId','attachmentIds'];
   const stateFields=['housingFinance','vehicles','fuelEvents','portableSchemaVersion','budget','settings','transactions','condition','recurringCharges','recurringChargesVersion','datasetVersion','legacyDemoCleanupVersion','legacyDemoCleanupRemoved'];
@@ -60,7 +61,7 @@
     return {refs,count};
   }
   function validateState(s){
-    Housing.validate(s);
+    Housing.validate(s);Lease.validate(s);
     keys(s,stateFields,'$.state');if(s.portableSchemaVersion!==3)fail('$.state.portableSchemaVersion','unsupported schema');
     number(s.budget,'$.state.budget');
     for(const k of ['datasetVersion','legacyDemoCleanupVersion','recurringChargesVersion'])number(s[k],`$.state.${k}`,{integer:true});
