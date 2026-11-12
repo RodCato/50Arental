@@ -13,11 +13,22 @@
 <body>
   <script>try{if(JSON.parse(localStorage.getItem('50a-data-mode')||'null')?.mode==='cloud')document.body.classList.add('cloud-locked')}catch{document.body.classList.add('cloud-locked')}</script>
   <header class="topbar">
-    <div>
+    <div class="header-brand">
       <p class="eyebrow">PERSONAL HOME LEDGER</p>
       <h1>50A Ledger</h1>
       <p class="subtitle">Track what the place costs, what you returned, and what recurs.</p>
     </div>
+    <button id="navigationToggle" class="ghost navigation-toggle" type="button" aria-label="Main navigation" aria-expanded="false" aria-controls="mainNavigation"><span aria-hidden="true">☰</span> Menu</button>
+    <nav id="mainNavigation" class="tabs header-navigation" aria-label="Sections" hidden>
+      <button class="tab active" data-tab="overview" aria-current="page">Overview</button>
+      <button class="tab" data-tab="monthly">Monthly</button>
+      <button class="tab" data-tab="recurring">Monthly bills</button>
+      <button class="tab" data-tab="setup">Setup</button>
+      <button class="tab" data-tab="income">Income</button>
+      <button class="tab" data-tab="automotive">Automotive</button>
+      <button class="tab" data-tab="property">Property</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </nav>
     <button id="seedBtn" class="ghost">Load reconciled data</button>
   </header>
 
@@ -78,16 +89,7 @@
       </section>
     </section>
 
-    <nav class="tabs" aria-label="Sections">
-      <button class="tab active" data-tab="overview">Overview</button>
-      <button class="tab" data-tab="monthly">Monthly</button>
-      <button class="tab" data-tab="recurring">Monthly bills</button>
-      <button class="tab" data-tab="setup">Setup</button>
-      <button class="tab" data-tab="income">Income</button>
-      <button class="tab" data-tab="automotive">Automotive</button>
-      <button class="tab" data-tab="property">Property</button>
-      <button class="tab" data-tab="settings">Settings</button>
-    </nav>
+
 
     <section id="income" class="tab-panel"><div id="housingIncome"></div></section>
     <section id="monthly" class="tab-panel">

@@ -1,6 +1,7 @@
+import {navigateTo} from './navigation.mjs';
 import assert from 'node:assert/strict';
 export async function checkSettingsDisclosure(page,{cloud=false}={}) {
-  await page.locator('[data-tab="settings"]').click();
+  await navigateTo(page, '[data-tab="settings"]');
   const tools=page.locator('#legacyRecoveryTools'),summary=tools.locator('summary');
   assert.equal(await tools.getAttribute('open'),null,'Collapsed on page load');
   assert.equal(await page.locator('#exportBtn').isVisible(),false);
