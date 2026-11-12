@@ -52,7 +52,7 @@ console.log('Recurring migration, actual spending, run-rate, CRUD, legacy loadin
 console.log('Audit: rent $965 + internet $40 + electric $93 = $1,098; actual utilities $123; recurring savings $'+savings.toFixed(2));
 // Existing Drive backup/merge retains bill IDs and newer deactivations.
 run('const SYNC_SCHEMA_VERSION=1;');
-for(const name of ['ensureSyncMeta','syncSettingsSnapshot','syncHash','markSyncDirty','buildSyncPayload','syncUpdatedAt','mergeSyncRecords','validateSyncPayload','applyRemoteMerge'])run(declaration(name));
+for(const name of ['ensureSyncMeta','syncSettingsSnapshot','syncHash','markSyncDirty','assertLegacyBeneficiaries','buildSyncPayload','syncUpdatedAt','mergeSyncRecords','validateSyncPayload','applyRemoteMerge'])run(declaration(name));
 run('state=RecurringUtils.migrate(load()); state.condition=[];');
 assert.equal(run('buildSyncPayload().state.recurringCharges[0].id'),'recurring-legacy-rent');
 run(`var remote=JSON.parse(JSON.stringify(buildSyncPayload()));remote.state.recurringCharges[0].active=false;remote.state.recurringCharges[0].updatedAt='2099-01-01T00:00:00Z';applyRemoteMerge(remote);`);
@@ -167,3 +167,10 @@ controls['#transactionBill'].value='rent';
 run('refreshTransactionBill()');
 assert.equal(controls['#variableBillFields'].hidden,true);
 assert.equal(submitControl.textContent,'Save changes');
+
+// EXPENSES-003: legacy sync has no beneficiary capability negotiation.
+run("state.transactions[0].items[0].beneficiary='kids_ex'");
+const tagged=run('JSON.stringify(state)');
+assert.throws(()=>run('buildSyncPayload()'),/cannot preserve beneficiary/);
+assert.throws(()=>run('applyRemoteMerge(remote)'),/cannot preserve beneficiary/);
+assert.equal(run('JSON.stringify(state)'),tagged);

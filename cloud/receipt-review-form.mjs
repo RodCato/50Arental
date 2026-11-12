@@ -1,17 +1,21 @@
 import Finance from '../finance-utils.js';
 import {createReview,reviewedTotals,transactionDraft,classifySelected} from './receipt-draft.mjs';
 // All controls edit a separate runtime draft; raw extraction remains unchanged.
-export function reviewForm(root,data,{apply,currentCount,unsaved=false}){
- const draft=createReview(data.extraction),form=document.createElement('form');form.className='receipt-review-form';root.replaceChildren(form);
+export function reviewForm(root,data,{apply,currentCount,unsaved=false,hasBeneficiaries=false}){
+ const draft=createReview(data.extraction),form=document.createElement('form');draft.requireBeneficiaries=hasBeneficiaries;form.className='receipt-review-form';root.replaceChildren(form);
  const element=(parent,tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;parent.append(e);return e;};
  const button=(parent,label,work)=>{const b=element(parent,'button',label);b.type='button';b.className='ghost';b.onclick=work;return b;};
  const input=(parent,label,value,change,{type='text',key}={})=>{const wrap=element(parent,'label',label),i=element(wrap,'input');i.type=type;i.value=value;i.setAttribute('aria-label',label);if(key)i.dataset.reviewField=key;if(type==='number'){if(key!=='discounts')i.min='0';i.step='0.01';i.inputMode='decimal';}i.oninput=()=>{change(i.value);ack.checked=false;reconcile()};return i;};
- const select=(parent,label,values,value,change)=>{const wrap=element(parent,'label',label),s=element(wrap,'select');s.setAttribute('aria-label',label);for(const v of values)s.add(new Option(v.replaceAll('_',' '),v));s.value=value;s.onchange=()=>{change(s.value);ack.checked=false;reconcile()};return s;};
+ const select=(parent,label,values,value,change)=>{const wrap=element(parent,'label',label),s=element(wrap,'select');s.setAttribute('aria-label',label);for(const v of values)s.add(new Option(Finance.beneficiaryLabels[v]||(v===''?'Choose beneficiary':v.replaceAll('_',' ')),v));s.value=value;s.onchange=()=>{change(s.value);ack.checked=false;reconcile()};return s;};
  element(form,'h3','Review receipt · unsaved draft');element(form,'p','Apply updates the transaction draft. Only Save transaction saves financial data. Amounts are charged line totals; quantity does not multiply them.');
+ if(hasBeneficiaries)element(form,'p','Existing lines have beneficiary choices. Choose a beneficiary for every replacement item and tax before Apply; receipt extraction does not infer or match beneficiaries.');
+ const beneficiaryOptions=hasBeneficiaries?['',...Finance.beneficiaries]:Finance.beneficiaries;
+ const setBeneficiary=(item,key,v)=>{if(v==='')delete item[key];else item[key]=v};
  const fields=element(form,'div');fields.className='receipt-fields';
  for(const [key,label,type] of [['merchant','Merchant','text'],['transaction_date','Date (blank keeps existing)','date'],['subtotal','Receipt merchandise subtotal','number'],['total','Receipt total','number']])input(fields,label,draft[key],v=>draft[key]=v,{type,key});
  if(!draft.transaction_date)element(form,'p','Date was not readable. Leave blank to keep the transaction date.');
  const taxBox=element(form,'section');taxBox.className='receipt-tax';element(taxBox,'h3','Sales tax · system-generated component');element(taxBox,'p','Other / tax / not setup. Adds to total expenses only; never allocated into item prices.');input(taxBox,'Sales tax',draft.tax,v=>draft.tax=v,{type:'number',key:'tax'});
+ select(taxBox,'Tax beneficiary',beneficiaryOptions,hasBeneficiaries?'':'personal',v=>setBeneficiary(draft,'taxBeneficiary',v));
  const bulk=element(form,'fieldset');element(bulk,'legend','Assign selected items');const bulkClass=Finance.receiptDefaults('Groceries');
  let bulkBucket,bulkSetup;select(bulk,'Bulk category',Finance.categories,bulkClass.category,v=>{Object.assign(bulkClass,Finance.receiptDefaults(v));bulkBucket.value=bulkClass.bucket;bulkSetup.value='none';});bulkBucket=select(bulk,'Bulk bucket',Finance.buckets.filter(b=>b!=='tax'),bulkClass.bucket,v=>bulkClass.bucket=v);bulkSetup=select(bulk,'Bulk setup class',Finance.setupClasses,'none',v=>bulkClass.setupClass=v);
  button(bulk,'Select all',()=>{draft.items.forEach(i=>i.selected=true);renderItems()});button(bulk,'Clear selection',()=>{draft.items.forEach(i=>i.selected=false);renderItems()});button(bulk,'Assign selected',()=>{classifySelected(draft,bulkClass);ack.checked=false;renderItems();reconcile()});
@@ -22,6 +26,7 @@ export function reviewForm(root,data,{apply,currentCount,unsaved=false}){
   const origin=element(card,'small',item.changed?'User changed':item.suggested?'AI suggested · verify':'Needs classification review');origin.dataset.suggestion='';const changed=()=>{item.changed=true;origin.textContent='User changed'};
   input(card,'Description',item.description,v=>{item.description=v;changed()});input(card,'Charged item total',item.total_price,v=>{item.total_price=v;changed()},{type:'number'});
   const classification=element(card,'details');classification.className='receipt-classification';element(classification,'summary','Bucket / setup class');let bucket,setup;select(card,'Category',Finance.categories,item.category,v=>{Object.assign(item,Finance.receiptDefaults(v));bucket.value=item.bucket;setup.value=item.setupClass;changed()});bucket=select(classification,'Bucket',Finance.buckets.filter(b=>b!=='tax'),item.bucket,v=>{item.bucket=v;if(v!=='housing_one_time'){item.setupClass='none';setup.value='none'}changed()});setup=select(classification,'Setup class',Finance.setupClasses,item.setupClass,v=>{item.setupClass=v;changed()});
+  select(card,'Beneficiary',beneficiaryOptions,item.beneficiary??(hasBeneficiaries?'':'personal'),v=>{setBeneficiary(item,'beneficiary',v);changed()});
   card.append(classification);const detail=element(card,'details');element(detail,'summary','Item details');for(const [key,label,type] of [['quantity','Quantity','number'],['unit_price','Unit price (reference only)','number'],['sku','SKU','text'],['raw_text','Readable text','text']])input(detail,label,item[key],v=>{item[key]=v;changed()},{type});
   button(card,'Remove item',()=>{draft.items.splice(index,1);ack.checked=false;renderItems();reconcile()});
  });}

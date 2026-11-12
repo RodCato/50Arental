@@ -77,3 +77,10 @@
 
 /* Header section navigation uses a disclosure, not an ARIA application menu. */
 .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start}.header-brand{min-width:0}.navigation-toggle{display:flex;align-items:center;gap:8px;min-height:44px;align-self:start}.navigation-toggle [aria-hidden]{font-size:1.3rem}.topbar #seedBtn{grid-column:1/-1;justify-self:start}.header-navigation{grid-column:1/-1;justify-self:end;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:min(100%,360px);gap:8px;margin:0;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--panel);max-height:60vh;max-height:60dvh;overflow:auto}.header-navigation[hidden]{display:none}.header-navigation .tab{min-height:44px;text-align:left;white-space:normal}.header-navigation .tab[aria-current]{border-color:var(--accent);box-shadow:inset 3px 0 var(--accent);font-weight:700}.navigation-toggle:focus-visible,.header-navigation .tab:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+/* Beneficiary is independent of financial classification. */
+.beneficiary-field{display:flex;flex-direction:column;gap:.25rem;min-width:0;font-size:.8rem}
+.beneficiary-field select,.beneficiary-filter select{min-height:44px;width:100%;min-width:0}
+.beneficiary-filter{display:block;max-width:24rem;margin:1rem 0}
+.beneficiary-report{border:1px solid var(--border,#d0d5dd);border-radius:12px;padding:1rem;margin:1rem 0}
+.beneficiary-report>strong{font-size:1.5rem}.beneficiary-report ul{padding-left:1.25rem}.beneficiary-report li{overflow-wrap:anywhere}

@@ -29,9 +29,13 @@ export function transactionDraft(draft){
   if(!item.description.trim()||cents===null)throw Error('Every item needs a description and a non-negative cent amount.');
   if(item.quantity!==''&&(!Number.isFinite(Number(item.quantity))||Number(item.quantity)<=0))throw Error('Quantity must be positive or blank. Item amounts are already line totals.');
   if(!Finance.categories.includes(item.category)||!Finance.buckets.includes(item.bucket)||item.bucket==='tax'||!Finance.setupClasses.includes(item.setupClass))throw Error('Review the item classifications.');
-  return {...base,name:item.description.trim(),amount:(cents/100).toFixed(2),category:item.category,bucket:item.bucket,setupClass:item.bucket==='housing_one_time'?item.setupClass:'none'};
+  if(draft.requireBeneficiaries&&!Object.hasOwn(item,'beneficiary'))throw Error('Choose a beneficiary for every replacement item.');
+  Finance.beneficiaryOf(item);
+  return {...base,...(Object.hasOwn(item,'beneficiary')?{beneficiary:item.beneficiary}:{}),name:item.description.trim(),amount:(cents/100).toFixed(2),category:item.category,bucket:item.bucket,setupClass:item.bucket==='housing_one_time'?item.setupClass:'none'};
  });
  const tax=moneyCents(draft.tax);if(tax===null)throw Error('Verify Sales tax: enter an amount, including 0 if no tax was charged.');
- if(tax>0)items.push({...base,name:'Sales tax',amount:(tax/100).toFixed(2),category:'Other',bucket:'tax',setupClass:'none'});
+ if(tax>0&&draft.requireBeneficiaries&&!Object.hasOwn(draft,'taxBeneficiary'))throw Error('Choose a beneficiary for Sales tax.');
+ if(Object.hasOwn(draft,'taxBeneficiary'))Finance.beneficiaryOf({beneficiary:draft.taxBeneficiary});
+ if(tax>0)items.push({...base,...(Object.hasOwn(draft,'taxBeneficiary')?{beneficiary:draft.taxBeneficiary}:{}),name:'Sales tax',amount:(tax/100).toFixed(2),category:'Other',bucket:'tax',setupClass:'none'});
  return {merchant:draft.merchant,date,items};
 }
