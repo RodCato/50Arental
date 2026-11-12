@@ -61,6 +61,10 @@ try{
  await page.waitForFunction(()=>window.LedgerApp?.get()?.housingFinance?.income_sources?.length===1&&!document.body.inert);
  await page.reload();await page.waitForFunction(()=>window.LedgerApp?.get()?.housingFinance?.income_sources?.length===1&&!document.body.inert);
  const restoredHousing=await page.evaluate(async()=>({backup:await BackupUtils.create(state,attachmentGet),history:HousingUtils.history(state,'2026-10')}));assert.deepEqual(restoredHousing.backup.state,hb.state);assert.equal(restoredHousing.backup.integrity.stateSha256,hb.integrity.stateSha256);assert.deepEqual(restoredHousing.history,H.history(housing,'2026-10'));console.log('PASS: populated Housing Backup v3 UI restore, real IDB/reload/re-export, identical state hash and reconstructed history');
+ const L=require('../lease-utils.js'),leased=L.update(housing,{...L.empty(),endDate:'2028-03-31',noticeRule:'days',noticeDays:31,sourceNotes:'Synthetic signed lease',proposedRentCents:100000},{verify:true,today:'2028-01-01'}),lb=await U.create(leased,f.get);
+ await page.locator('#importInput').setInputFiles({name:'synthetic-lease-v3.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(lb))});await page.waitForFunction(()=>window.LedgerApp?.get()?.settings?.leaseTracker?.verified&&!document.body.inert);await page.reload();await page.waitForFunction(()=>window.LedgerApp?.get()?.settings?.leaseTracker?.verified&&!document.body.inert);
+ const restoredLease=await page.evaluate(async()=>await BackupUtils.create(state,attachmentGet));assert.deepEqual(restoredLease.state,lb.state);assert.deepEqual(restoredLease.attachments,lb.attachments);assert.equal(restoredLease.integrity.stateSha256,lb.integrity.stateSha256);console.log('PASS: lease metadata actual IDB restore/reload/export preserves hash and all embedded attachments');
+
  // Fail actual application render on the next activated-generation startup.
  const beforeRenderFailure=await page.evaluate(()=>localStorage.getItem('fiftyA-ledger-v1'));
  await page.evaluate(async()=>{const b=await BackupUtils.create(state,attachmentGet);await BackupStorage.stage(b,state,attachmentGet)});

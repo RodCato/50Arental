@@ -4,7 +4,7 @@ const vm=require('node:vm');
 const RecurringUtils=require('../recurring-utils.js');
 const source=fs.readFileSync(require('node:path').join(__dirname,'..','app.js'),'utf8');
 const declaration=name=>name==='reconciledTransactions'?source.slice(source.indexOf('function reconciledTransactions('),source.indexOf("\n$('#seedBtn').onclick")):source.split('\n').find(line=>line.startsWith(`function ${name}(`)||line.startsWith(`const ${name}=`));
-const context={HousingUtils:require('../housing-utils.js'),FinanceUtils:require('../finance-utils.js'),RecurringUtils,crypto:require('node:crypto').webcrypto,localStorage:{getItem:()=>null},console};
+const context={LeaseUtils:require('../lease-utils.js'),HousingUtils:require('../housing-utils.js'),FinanceUtils:require('../finance-utils.js'),RecurringUtils,crypto:require('node:crypto').webcrypto,localStorage:{getItem:()=>null},console};
 vm.createContext(context);vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'..','date-utils.js'),'utf8'),context);
 vm.runInContext([source.split('\n').slice(0,7).join('\n'),...['normalizeSettings','inferSetupClass','validImageSource','normalizeTransactions','isKnownLegacyDemo','migrateLegacyDemoTransactions','migrateRecurringSpectrumToUtility','reconciledTransactions','load','nextMonthDate','inferBucket','netItem','depositReturned','depositExpense','monthItems','expenseTotalsForMonth','benchmarkTotalsForMonth'].map(declaration)].join('\n'),context);
 const run=code=>vm.runInContext(code,context);
@@ -52,7 +52,7 @@ console.log('Recurring migration, actual spending, run-rate, CRUD, legacy loadin
 console.log('Audit: rent $965 + internet $40 + electric $93 = $1,098; actual utilities $123; recurring savings $'+savings.toFixed(2));
 // Existing Drive backup/merge retains bill IDs and newer deactivations.
 run('const SYNC_SCHEMA_VERSION=1;');
-for(const name of ['ensureSyncMeta','syncSettingsSnapshot','syncHash','markSyncDirty','buildSyncPayload','syncUpdatedAt','mergeSyncRecords','validateSyncPayload','applyRemoteMerge'])run(declaration(name));
+for(const name of ['ensureSyncMeta','syncSettingsSnapshot','syncHash','markSyncDirty','assertLegacyBeneficiaries','buildSyncPayload','syncUpdatedAt','mergeSyncRecords','validateSyncPayload','applyRemoteMerge'])run(declaration(name));
 run('state=RecurringUtils.migrate(load()); state.condition=[];');
 assert.equal(run('buildSyncPayload().state.recurringCharges[0].id'),'recurring-legacy-rent');
 run(`var remote=JSON.parse(JSON.stringify(buildSyncPayload()));remote.state.recurringCharges[0].active=false;remote.state.recurringCharges[0].updatedAt='2099-01-01T00:00:00Z';applyRemoteMerge(remote);`);
@@ -167,3 +167,10 @@ controls['#transactionBill'].value='rent';
 run('refreshTransactionBill()');
 assert.equal(controls['#variableBillFields'].hidden,true);
 assert.equal(submitControl.textContent,'Save changes');
+
+// EXPENSES-003: legacy sync has no beneficiary capability negotiation.
+run("state.transactions[0].items[0].beneficiary='kids_ex'");
+const tagged=run('JSON.stringify(state)');
+assert.throws(()=>run('buildSyncPayload()'),/cannot preserve beneficiary/);
+assert.throws(()=>run('applyRemoteMerge(remote)'),/cannot preserve beneficiary/);
+assert.equal(run('JSON.stringify(state)'),tagged);

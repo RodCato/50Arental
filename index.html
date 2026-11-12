@@ -13,16 +13,28 @@
 <body>
   <script>try{if(JSON.parse(localStorage.getItem('50a-data-mode')||'null')?.mode==='cloud')document.body.classList.add('cloud-locked')}catch{document.body.classList.add('cloud-locked')}</script>
   <header class="topbar">
-    <div>
+    <div class="header-brand">
       <p class="eyebrow">PERSONAL HOME LEDGER</p>
       <h1>50A Ledger</h1>
       <p class="subtitle">Track what the place costs, what you returned, and what recurs.</p>
     </div>
+    <button id="navigationToggle" class="ghost navigation-toggle" type="button" aria-label="Main navigation" aria-expanded="false" aria-controls="mainNavigation"><span aria-hidden="true">☰</span> Menu</button>
+    <nav id="mainNavigation" class="tabs header-navigation" aria-label="Sections" hidden>
+      <button class="tab active" data-tab="overview" aria-current="page">Overview</button>
+      <button class="tab" data-tab="monthly">Monthly</button>
+      <button class="tab" data-tab="recurring">Monthly bills</button>
+      <button class="tab" data-tab="setup">Setup</button>
+      <button class="tab" data-tab="income">Income</button>
+      <button class="tab" data-tab="automotive">Automotive</button>
+      <button class="tab" data-tab="property">Property</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </nav>
     <button id="seedBtn" class="ghost">Load reconciled data</button>
   </header>
 
   <main class="shell">
     <section id="overview" class="tab-panel active">
+    <p id="leaseNoticeAlert" class="lease-notice-alert" role="status" aria-live="polite" hidden></p>
     <section id="housingCoverageCard" class="benchmark-card" aria-label="Housing Coverage"></section>
     <section id="overviewMetrics" class="hero-grid">
       <article class="metric primary">
@@ -64,7 +76,7 @@
           <div><span>Projected annual savings</span><strong id="annualSavings">$0.00</strong><small>Projected recurring monthly savings × 12</small></div>
         </div>
       </section>
-      <p class="benchmark-note">Recognized costs include scheduled fixed bills; variable actuals may be incomplete. The gap is not realized savings or proof bills were paid. Recurring differences are projections. Groceries and other non-housing expenses are excluded from the Josh housing comparison.</p>
+      <p class="benchmark-note">Recognized costs include scheduled fixed bills; variable actuals may be incomplete. The gap is not realized savings or proof bills were paid. Recurring differences are projections. Kids/Ex household, groceries and other non-housing expenses are excluded from the Josh housing comparison.</p>
       <section class="payback-card" aria-labelledby="paybackName">
         <div class="payback-head"><div><p class="eyebrow">SAVINGS CHALLENGE</p><h2 id="paybackName">Waterdrop Challenge</h2><p id="paybackStatus" class="benchmark-summary">GALLON 59 — BREAK EVEN</p></div><button id="addGallonBtn" type="button" class="accent">+1 GALLON</button></div>
         <div class="progress payback-progress"><div id="paybackProgress"></div></div>
@@ -76,18 +88,13 @@
         <details class="payback-history"><summary>Recent gallons</summary><div id="paybackHistory"></div></details>
         <button id="undoGallonBtn" type="button" class="ghost compact payback-undo">Undo last gallon</button>
       </section>
+      <details id="leaseTracker" class="benchmark-card lease-disclosure">
+        <summary id="leaseTrackerSummary"><span class="lease-chevron" aria-hidden="true">›</span><span><strong>Lease Tracker</strong><span id="leaseTrackerStatus">Unverified</span></span></summary>
+        <div id="leaseTrackerContent"></div>
+      </details>
     </section>
 
-    <nav class="tabs" aria-label="Sections">
-      <button class="tab active" data-tab="overview">Overview</button>
-      <button class="tab" data-tab="monthly">Monthly</button>
-      <button class="tab" data-tab="recurring">Monthly bills</button>
-      <button class="tab" data-tab="setup">Setup</button>
-      <button class="tab" data-tab="income">Income</button>
-      <button class="tab" data-tab="automotive">Automotive</button>
-      <button class="tab" data-tab="property">Property</button>
-      <button class="tab" data-tab="settings">Settings</button>
-    </nav>
+
 
     <section id="income" class="tab-panel"><div id="housingIncome"></div></section>
     <section id="monthly" class="tab-panel">
@@ -106,9 +113,16 @@
         <article class="metric"><span>Sales tax</span><strong id="selectedTax">$0.00</strong><small>included in expenses, outside housing comparison</small></article>
         <article class="metric"><span>Other / excluded</span><strong id="selectedOther">$0.00</strong><small>visible, outside housing comparison</small></article>
       </div>
-      <div class="monthly-comparison"><strong id="selectedComparison">50A housing cost: $0.00 · Josh: $0.00</strong><span id="selectedComparisonDifference">$0.00 under/over Josh</span><small>Groceries and other non-housing expenses are excluded from the Josh housing comparison.</small></div>
+      <div class="monthly-comparison"><strong id="selectedComparison">50A housing cost: $0.00 · Josh: $0.00</strong><span id="selectedComparisonDifference">$0.00 under/over Josh</span><small>Kids/Ex household, groceries and other non-housing expenses are excluded from the Josh housing comparison. Category totals above include all beneficiaries; the filter below applies to transaction lines.</small></div>
+      <section class="beneficiary-report" aria-labelledby="kidsExHeading">
+        <h3 id="kidsExHeading">Kids/Ex household — selected month</h3>
+        <strong id="kidsExTotal">$0.00</strong><p id="kidsExCount"></p><ul id="kidsExCategories"></ul>
+        <p class="meta">Already included once in total expenses and ordinary categories. Excluded from 50A housing and the Josh comparison. Fully refunded and non-expense lines do not count.</p>
+      </section>
+      <label class="beneficiary-filter">Transaction beneficiary<select id="beneficiaryFilter"><option value="all">All beneficiaries</option><option value="personal">Personal household</option><option value="kids_ex">Kids/Ex household</option></select></label>
       <section id="monthlyRecurringBills" class="cards"></section>
       <div class="filter-row" role="group" aria-label="Monthly transaction filters"><button type="button" class="filter-button active" data-month-filter="all">All</button><button type="button" class="filter-button" data-month-filter="housing">Housing</button><button type="button" class="filter-button" data-month-filter="utilities">Utilities</button><button type="button" class="filter-button" data-month-filter="setup">Household/setup</button><button type="button" class="filter-button" data-month-filter="groceries">Groceries</button><button type="button" class="filter-button" data-month-filter="automotive">Automotive</button><button type="button" class="filter-button" data-month-filter="tax">Sales tax</button><button type="button" class="filter-button" data-month-filter="other">Excluded/other</button></div>
+      <details id="utilityPaymentHistory" class="utility-payment-history"><summary>Utility payment history ($) · Electricity &amp; Water/sewer</summary><div id="utilityPaymentContent"></div></details>
       <section id="categorySummary" class="category-summary" aria-live="polite">
         <div><p class="eyebrow">SELECTED-MONTH CATEGORY TOTAL</p><h3 id="categorySummaryTitle">All expenses — August 2026</h3><p id="categorySummaryScope">Selected month spending</p><small id="categoryAllTimeContext">All-time All expenses: $0.00</small></div>
         <div class="category-summary-net"><span>Recognized expenses</span><strong id="categoryNetSpent">$0.00</strong></div>
@@ -348,7 +362,8 @@
     <div class="line-item">
       <input data-field="name" required placeholder="Item name" />
       <input data-field="amount" required type="number" min="0" step="0.01" placeholder="Price" />
-      <select data-field="category"></select>
+      <select data-field="category" aria-label="Expense category"></select>
+      <label class="beneficiary-field">Benefits<select data-field="beneficiary" aria-label="Beneficiary"></select></label>
       <select data-field="bucket" aria-label="Financial bucket"></select>
       <select data-field="setupClass" aria-label="One-time setup classification"></select>
       <select data-field="period" aria-label="Rent period"><option value="monthly">Normal period</option><option value="prorated">Prorated / one period</option></select>
@@ -365,13 +380,17 @@
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
   <script src="housing-utils.js"></script>
   <script src="finance-utils.js"></script>
+  <script src="lease-utils.js"></script>
   <script src="recurring-utils.js"></script>
+  <script src="utilities-utils.js"></script>
   <script src="automotive-utils.js"></script>
   <script src="backup-utils.js"></script>
   <script src="backup-storage.js"></script>
   <script src="backup-boot.js"></script>
   <script defer src="housing-ui.js"></script>
+  <script defer src="lease-ui.js"></script>
   <script defer src="automotive-ui.js"></script>
+  <script defer src="utilities-ui.js"></script>
   <script defer src="cloud-foundation.js"></script>
 </body>
 </html>

@@ -32,7 +32,7 @@
     const latest=new Map();
     for(const tx of [...(saved.transactions||[])].sort((a,b)=>String(a.date).localeCompare(String(b.date)))){
       for(const item of tx.items||[]){
-        if(!item.recurring||item.prorated||/^(50a\s+)?(monthly\s+)?rent$/i.test(String(item.name||'').trim())||['avoided','cancelled','reused','returned','refunded'].includes(item.status)||item.setupClass&&item.setupClass!=='none')continue;
+        if(!Finance.personal(item)||!item.recurring||item.prorated||/^(50a\s+)?(monthly\s+)?rent$/i.test(String(item.name||'').trim())||['avoided','cancelled','reused','returned','refunded'].includes(item.status)||item.setupClass&&item.setupClass!=='none')continue;
         if(!['housing_recurring','utilities'].includes(item.bucket))continue;
         const key=String(item.name||'').trim().toLowerCase();
         if(key)latest.set(key,item);
@@ -69,6 +69,7 @@
       next.oneTimeAmount=portion.oneTimeAmount;
       if(updateMonthlyEstimate){
         if(!bill||bill.active===false)throw new Error('Choose an active monthly bill before updating its estimate.');
+        if((next.items||[]).some(i=>!Finance.personal(i)))throw new Error('A Kids/Ex or mixed-household payment cannot update a personal monthly bill estimate.');
         if(bill.kind!=='estimated')throw new Error('Fixed monthly bills must be edited in Monthly bills.');
         if(!next.items?.length||next.items.some(item=>!['utilities','housing_recurring'].includes(item.bucket)||item.status&&item.status!=='kept'))throw new Error('Use a separate housing or utility payment with kept line items to update a monthly estimate.');
         bills=upsert(bills,{...bill,amount:portion.recurringAmount},now);
@@ -94,15 +95,16 @@
       const isUtility=!!(revision?.utility_type||bill.utilityType)||['Utilities','Internet'].includes(revision?.category||bill.category);
       const bucket=isUtility?'utilities':'housing_recurring';
       const actual=linked.reduce((n,t)=>n+Math.round(Finance.expenses(t.items).expenses*100),0)/100;
+      const personalPayment=linked.every(t=>t.items.every(Finance.personal));
       const service=linked.reduce((n,t)=>n+Math.round(paymentPortion(t).recurringAmount*100),0)/100;
       const auto=eligible&&kind==='fixed'&&!linked.length;
       const item={name:bill.name,amount,category:isUtility?'Utilities':'Other',bucket,status:'kept',adjustment:0,setupClass:'none'};
       if(auto)automatic.push(item);
-      occurrences.push({key:`recurring:${bill.id}:${month}`,billId:bill.id,name:bill.name,month,kind,bucket,amount,actual,service,linkedIds:linked.map(t=>t.id),automatic:auto,recognized:auto?amount:actual,estimate:kind==='estimated'&&!linked.length&&revision?.active?amount:0,eligible,dueDay:revision?.due_day??null,dueDate:revision?.due_day?month+'-'+String(Math.min(revision.due_day,new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).getDate())).padStart(2,'0'):null,autopay:revision?.autopay??true,start,status:linked.length?'Recorded actual':!eligible?'Projected / not yet recognized':kind==='estimated'?'Awaiting actual amount':revision.autopay===false?'Scheduled':'Scheduled / Autopay'});
+      occurrences.push({key:`recurring:${bill.id}:${month}`,billId:bill.id,name:bill.name,month,kind,bucket,amount,actual,service,personalPayment,linkedIds:linked.map(t=>t.id),automatic:auto,recognized:auto?amount:actual,estimate:kind==='estimated'&&!linked.length&&revision?.active?amount:0,eligible,dueDay:revision?.due_day??null,dueDate:revision?.due_day?month+'-'+String(Math.min(revision.due_day,new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).getDate())).padStart(2,'0'):null,autopay:revision?.autopay??true,start,status:linked.length?'Recorded actual':!eligible?'Projected / not yet recognized':kind==='estimated'?'Awaiting actual amount':revision.autopay===false?'Scheduled':'Scheduled / Autopay'});
     }
     const total=Finance.expenses([...transactions.flatMap(t=>t.items),...automatic]);
     const sum=fn=>occurrences.reduce((n,o)=>n+Math.round(fn(o)*100),0)/100;
-    return {occurrences,automatic,totals:total,fixedRecognized:sum(o=>o.automatic?o.amount:0),variableActual:sum(o=>o.kind==='estimated'?o.actual:0),outstanding:sum(o=>o.estimate),projected:sum(o=>o.kind==='estimated'&&o.linkedIds.length?o.service:o.amount)};
+    return {occurrences,automatic,totals:total,fixedRecognized:sum(o=>o.automatic?o.amount:0),variableActual:sum(o=>o.kind==='estimated'?o.actual:0),outstanding:sum(o=>o.estimate),projected:sum(o=>o.kind==='estimated'&&o.linkedIds.length&&o.personalPayment?o.service:o.amount)};
   }
   function occurrenceMonths(saved,today){const end=today.slice(0,7),starts=Housing.data(saved).recurring_charge_revisions.map(r=>r.effective_month).sort();if(!starts.length)return [];const out=[];let m=starts[0];while(m<=end){out.push(m);if(out.length>1200)throw Error('Recurring history exceeds supported range');let [y,n]=m.split('-').map(Number);if(++n===13){n=1;y++}m=`${String(y).padStart(4,'0')}-${String(n).padStart(2,'0')}`}return out}
   const api={active,total,upsert,deactivate,migrate,status,actualStatus,paymentPortion,saveTransaction,monthly,occurrenceMonths};

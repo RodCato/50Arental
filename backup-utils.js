@@ -3,6 +3,7 @@
   const Finance=typeof module!=='undefined'&&module.exports?require('./finance-utils.js'):root.FinanceUtils;
   const Automotive=typeof module!=='undefined'&&module.exports?require('./automotive-utils.js'):root.AutomotiveUtils;
   const Housing=typeof module!=='undefined'&&module.exports?require('./housing-utils.js'):root.HousingUtils;
+  const Lease=typeof module!=='undefined'&&module.exports?require('./lease-utils.js'):root.LeaseUtils;
   const FORMAT='50a-ledger-backup',VERSION=3,MAX_BYTES=128*1024*1024,MAX_IMAGE=20*1024*1024;
   // JSON would silently turn NaN/Infinity into null, which is a legacy zero only in specific fields.
   const clone=value=>JSON.parse(JSON.stringify(value,(_key,v)=>{if(typeof v==='number'&&!Number.isFinite(v))fail('$','nonfinite number');return v}));
@@ -39,8 +40,8 @@
   }
   function keys(value,allowed,p){object(value,p);for(const k of Object.keys(value))if(!allowed.includes(k))fail(p,'unsupported field')}
   const txFields=['id','date','merchant','notes','items','receipt','attachmentIds','recurringChargeId','oneTimeAmount','systemKey','sampleKey'];
-  const itemFields=['name','amount','category','bucket','setupClass','status','adjustment','depositStatus','depositRefunded','moveIn','prorated','estimated','recurring','giftCardOffset'];
-  const settingsFields=['rent50a','joshRent','joshAdjustments','joshStayDays','joshCleaning','moveInDate','proratedRent','adminFee','depositAmount','depositStatus','depositRefunded','forgottenEssentialsBudget','waterdropPayback'];
+  const itemFields=['beneficiary','name','amount','category','bucket','setupClass','status','adjustment','depositStatus','depositRefunded','moveIn','prorated','estimated','recurring','giftCardOffset'];
+  const settingsFields=['leaseTracker','rent50a','joshRent','joshAdjustments','joshStayDays','joshCleaning','moveInDate','proratedRent','adminFee','depositAmount','depositStatus','depositRefunded','forgottenEssentialsBudget','waterdropPayback'];
   const billFields=['id','name','amount','category','kind','utilityType','active','createdAt','updatedAt'];
   const conditionFields=['id','room','phase','date','notes','attachmentId','attachmentIds'];
   const stateFields=['housingFinance','vehicles','fuelEvents','portableSchemaVersion','budget','settings','transactions','condition','recurringCharges','recurringChargesVersion','datasetVersion','legacyDemoCleanupVersion','legacyDemoCleanupRemoved'];
@@ -60,7 +61,7 @@
     return {refs,count};
   }
   function validateState(s){
-    Housing.validate(s);
+    Housing.validate(s);Lease.validate(s);
     keys(s,stateFields,'$.state');if(s.portableSchemaVersion!==3)fail('$.state.portableSchemaVersion','unsupported schema');
     number(s.budget,'$.state.budget');
     for(const k of ['datasetVersion','legacyDemoCleanupVersion','recurringChargesVersion'])number(s[k],`$.state.${k}`,{integer:true});
@@ -83,7 +84,7 @@
     const txs=array(s.transactions,'$.state.transactions');ids(txs,'$.state.transactions');
     for(const field of ['sampleKey','systemKey']){const seen=new Set();txs.forEach((t,i)=>{if(t[field]!=null){text(t[field],`$.state.transactions[${i}].${field}`,true);if(seen.has(t[field]))fail(`$.state.transactions[${i}].${field}`,'duplicate key');seen.add(t[field])}})}
     txs.forEach((t,i)=>{const p=`$.state.transactions[${i}]`;keys(t,txFields,p);text(t.merchant,p+'.merchant',true);text(t.notes,p+'.notes');date(t.date,p+'.date');array(t.attachmentIds,p+'.attachmentIds');
-      array(t.items,p+'.items').forEach((it,j)=>{const q=`${p}.items[${j}]`;keys(it,itemFields,q);text(it.name,q+'.name',true);text(it.category,q+'.category');number(it.amount,q+'.amount');optionalZero(it.adjustment,q+'.adjustment');enumeration(it.bucket,Finance.buckets,q+'.bucket');enumeration(it.status,Finance.statuses,q+'.status');if(it.setupClass!==undefined)enumeration(it.setupClass,Finance.setupClasses,q+'.setupClass');if(it.depositStatus!==undefined)enumeration(it.depositStatus,deposits,q+'.depositStatus');if(it.bucket==='refundable_deposit'&&it.depositStatus===undefined)fail(q+'.depositStatus','required');if(it.depositRefunded!==undefined){const refunded=optionalZero(it.depositRefunded,q+'.depositRefunded');if(refunded>Number(it.amount))fail(q+'.depositRefunded','exceeds deposit')}for(const k of ['moveIn','prorated','estimated','recurring'])if(it[k]!==undefined)boolean(it[k],q+'.'+k);if(it.giftCardOffset!==undefined)number(it.giftCardOffset,q+'.giftCardOffset')});
+      array(t.items,p+'.items').forEach((it,j)=>{const q=`${p}.items[${j}]`;keys(it,itemFields,q);if(Object.hasOwn(it,'beneficiary'))enumeration(it.beneficiary,Finance.beneficiaries,q+'.beneficiary');text(it.name,q+'.name',true);text(it.category,q+'.category');number(it.amount,q+'.amount');optionalZero(it.adjustment,q+'.adjustment');enumeration(it.bucket,Finance.buckets,q+'.bucket');enumeration(it.status,Finance.statuses,q+'.status');if(it.setupClass!==undefined)enumeration(it.setupClass,Finance.setupClasses,q+'.setupClass');if(it.depositStatus!==undefined)enumeration(it.depositStatus,deposits,q+'.depositStatus');if(it.bucket==='refundable_deposit'&&it.depositStatus===undefined)fail(q+'.depositStatus','required');if(it.depositRefunded!==undefined){const refunded=optionalZero(it.depositRefunded,q+'.depositRefunded');if(refunded>Number(it.amount))fail(q+'.depositRefunded','exceeds deposit')}for(const k of ['moveIn','prorated','estimated','recurring'])if(it[k]!==undefined)boolean(it[k],q+'.'+k);if(it.giftCardOffset!==undefined)number(it.giftCardOffset,q+'.giftCardOffset')});
       if(t.recurringChargeId!=null){if(!billIds.has(t.recurringChargeId))fail(p+'.recurringChargeId','dangling reference');const oneTime=optionalZero(t.oneTimeAmount,p+'.oneTimeAmount');const actual=t.items.reduce((sum,it)=>sum+(['avoided','cancelled','reused'].includes(it.status)?0:Math.round(Number(it.amount)*100)-Math.round(optionalZero(it.adjustment,p+'.items.adjustment')*100)),0)/100;if(oneTime>actual)fail(p+'.oneTimeAmount','exceeds payment')}else if(t.oneTimeAmount!==undefined){if(optionalZero(t.oneTimeAmount,p+'.oneTimeAmount')!==0)fail(p+'.oneTimeAmount','requires associated bill');}
     });
     const conditions=array(s.condition,'$.state.condition');ids(conditions,'$.state.condition');conditions.forEach((r,i)=>{const p=`$.state.condition[${i}]`;keys(r,conditionFields,p);text(r.room,p+'.room');text(r.notes,p+'.notes');enumeration(r.phase,['move-in','move-out'],p+'.phase');date(r.date,p+'.date')});
